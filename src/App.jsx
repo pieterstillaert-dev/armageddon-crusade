@@ -874,7 +874,7 @@ export default function App() {
                 </div>
 
                 <div className="grid grid-cols-1 gap-8">
-                   {/* NIEUW: MANUAL CHRONICLES EDITOR */}
+                   {/* MANUAL CHRONICLES EDITOR */}
                    <div className="bg-zinc-900 p-6 rounded-3xl border border-zinc-800">
                       <h3 className="font-black uppercase text-zinc-500 mb-4 flex items-center gap-2 text-xs"><FileText size={16}/> Edit Chronicles of the Scribe</h3>
                       <form onSubmit={handleUpdateChronicles} className="space-y-4">
@@ -896,7 +896,11 @@ export default function App() {
                       <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 gap-4">
                         {crusadeCards.map(c => (
                            <div key={c.id} className="bg-zinc-950 p-4 rounded-2xl flex justify-between items-center border border-zinc-800 hover:border-red-900/50 transition-colors">
-                              <div><p className="font-black text-xs uppercase">{String(c.forceName)}</p><p className="text-[8px] text-zinc-600">{String(c.playerName)}</p></div>
+                              <div>
+                                 <p className="font-black text-xs uppercase">{String(c.forceName)}</p>
+                                 <p className="text-[8px] text-zinc-600">{String(c.playerName)}</p>
+                                 {c.timestamp && <p className="text-[8px] text-zinc-500 italic mt-1">Toegevoegd: {new Date(c.timestamp).toLocaleString()}</p>}
+                              </div>
                               <button onClick={() => deleteDocument('cards', c.id)} className="p-2 bg-red-900/10 text-red-600 rounded-lg hover:bg-red-600 hover:text-white transition-all"><Trash2 size={14}/></button>
                            </div>
                         ))}
@@ -908,7 +912,10 @@ export default function App() {
                       <div className="space-y-2">
                         {battleLogs.map(b => (
                            <div key={b.id} className="bg-zinc-950 p-3 rounded-xl flex justify-between items-center border border-zinc-800 hover:border-red-900/30 transition-all">
-                              <p className="text-[10px] font-bold uppercase">{String(b.attacker)} vs {String(b.defender)} (Win: {String(b.winner)})</p>
+                              <div>
+                                 <p className="text-[10px] font-bold uppercase">{String(b.attacker)} vs {String(b.defender)} (Win: {String(b.winner)})</p>
+                                 {b.timestamp && <p className="text-[8px] text-zinc-500 italic">{new Date(b.timestamp).toLocaleString()}</p>}
+                              </div>
                               <button onClick={() => deleteDocument('battles', b.id)} className="p-2 text-red-600 hover:bg-red-900/20 rounded-lg transition-all"><Trash2 size={12}/></button>
                            </div>
                         ))}
@@ -920,7 +927,10 @@ export default function App() {
                       <div className="space-y-2">
                         {loreEntries.map(e => (
                            <div key={e.id} className="bg-zinc-950 p-3 rounded-xl flex justify-between items-center border border-zinc-800 hover:border-orange-500/20 transition-all">
-                              <p className="text-[10px] font-bold uppercase">{String(e.title)} <span className="opacity-30">by {String(e.forceName)}</span></p>
+                              <div>
+                                 <p className="text-[10px] font-bold uppercase">{String(e.title)} <span className="opacity-30">by {String(e.forceName)}</span></p>
+                                 {e.timestamp && <p className="text-[8px] text-zinc-500 italic">{new Date(e.timestamp).toLocaleString()}</p>}
+                              </div>
                               <div className="flex gap-2">
                                  <button onClick={() => setEditingLore(e)} className="p-2 text-orange-500 hover:bg-orange-900/20 rounded-lg"><Edit3 size={12}/></button>
                                  <button onClick={() => deleteDocument('lore', e.id)} className="p-2 text-red-600 hover:bg-red-900/20 rounded-lg transition-all"><Trash2 size={12}/></button>
