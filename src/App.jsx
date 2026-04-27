@@ -137,6 +137,10 @@ export default function App() {
   const [newUnitName, setNewUnitName] = useState('');
   const [editingLore, setEditingLore] = useState(null);
 
+  // States voor het bekijken van andere legers (Read-only)
+  const [expandedOtherCard, setExpandedOtherCard] = useState(null);
+  const [expandedOtherUnit, setExpandedOtherUnit] = useState(null);
+
   useEffect(() => {
     const initAuth = async () => {
       try {
@@ -191,7 +195,7 @@ export default function App() {
           headers: { 'Content-Type': 'application/json' },
           body: JSON.stringify({
             contents: [{ parts: [{ text: prompt }] }],
-            systemInstruction: { parts: [{ text: "Je bent een keizerlijke scribe van de Administratum. Schrijf een sfeervol verslag van de Armageddon Crusade in het Nederlands op basis van de beschikbare informatie in lore tab en uitgevochten battles in battle log. Gebruik 40k termen. Houd het onder de 250 woorden." }] }
+            systemInstruction: { parts: [{ text: "Je bent een keizerlijke scribe van de Administratum. Schrijf een sfeervol verslag van de Armageddon Crusade in het Nederlands. Gebruik 40k termen. Houd het onder de 250 woorden." }] }
           })
         });
         const result = await response.json();
@@ -614,6 +618,82 @@ export default function App() {
                 </div>
               </div>
             )}
+
+            {/* --- NIEUW: ANDERE SPELERS (READ ONLY) --- */}
+            {crusadeCards.filter(c => c.id !== myCard?.id).length > 0 && (
+              <div className="mt-12 space-y-6 animate-in fade-in border-t border-zinc-800/50 pt-8">
+                 <div className="flex items-center gap-2 mb-6">
+                    <Globe size={20} className="text-zinc-600" />
+                    <h3 className="text-xl font-black uppercase tracking-tight text-zinc-400 italic">Archieven: Andere Legers</h3>
+                 </div>
+                 {crusadeCards.filter(c => c.id !== myCard?.id).map(card => (
+                    <div key={card.id} className="bg-zinc-900 border border-zinc-800 rounded-[2rem] overflow-hidden transition-all">
+                       <div className="p-6 cursor-pointer flex justify-between items-center hover:bg-zinc-800/30" onClick={() => setExpandedOtherCard(expandedOtherCard === card.id ? null : card.id)}>
+                          <div>
+                             <h4 className="text-lg font-black uppercase italic tracking-tighter text-zinc-300">{String(card.forceName)}</h4>
+                             <p className="text-[10px] font-bold uppercase text-zinc-500">{String(card.faction)} | {String(card.playerName)}</p>
+                          </div>
+                          <div className="flex items-center gap-4">
+                             <div className="hidden md:flex gap-4 text-[9px] font-black uppercase tracking-widest text-zinc-600">
+                                <span>Sup: {card.supply}</span>
+                                <span>RP: {card.rp}</span>
+                                <span>CP: {card.crusadePoints || 0}</span>
+                             </div>
+                             {expandedOtherCard === card.id ? <ChevronUp size={20} className="text-zinc-500"/> : <ChevronDown size={20} className="text-zinc-500"/>}
+                          </div>
+                       </div>
+                       
+                       {expandedOtherCard === card.id && (
+                          <div className="p-6 border-t border-zinc-800 bg-zinc-950/30">
+                             <h5 className="text-[10px] font-black uppercase tracking-widest text-zinc-500 mb-4">Geregistreerde Eenheden</h5>
+                             <div className="space-y-3">
+                                {card.units?.length > 0 ? card.units.map(unit => (
+                                   <div key={unit.id} className="bg-zinc-950 border border-zinc-800/50 rounded-xl overflow-hidden">
+                                      <div className="p-4 flex justify-between items-center bg-zinc-900/10 cursor-pointer hover:bg-zinc-900/40" onClick={() => setExpandedOtherUnit(expandedOtherUnit === unit.id ? null : unit.id)}>
+                                         <div className="flex items-center gap-3">
+                                            <span className="text-zinc-500 font-black text-xs px-2 py-1 bg-zinc-900 rounded border border-zinc-800/50">{unit.xp} XP</span>
+                                            <span className="font-black uppercase text-sm text-zinc-300 flex items-center gap-2">{String(unit.name)} {unit.isWarlord && <Crown size={12} className="text-yellow-600/50"/>}</span>
+                                         </div>
+                                         <div className="flex items-center gap-3">
+                                            <div className="flex gap-3 text-[9px] text-zinc-600 font-bold uppercase">
+                                               <span><Skull size={10} className="inline mr-1"/>{unit.killTally || 0}</span>
+                                               <span><Coins size={10} className="inline mr-1"/>{unit.points || 0}</span>
+                                            </div>
+                                            {expandedOtherUnit === unit.id ? <ChevronUp size={16} className="text-zinc-600"/> : <ChevronDown size={16} className="text-zinc-600"/>}
+                                         </div>
+                                      </div>
+                                      
+                                      {expandedOtherUnit === unit.id && (
+                                         <div className="p-5 grid grid-cols-1 md:grid-cols-2 gap-6 border-t border-zinc-800/50 bg-zinc-900/5">
+                                            <div className="space-y-4">
+                                               <div className="grid grid-cols-2 gap-4">
+                                                  <ReadOnlyField label="XP Points" value={unit.xp} />
+                                                  <ReadOnlyField label="Kill Tally" value={unit.killTally} />
+                                                  <ReadOnlyField label="Points (pts)" value={unit.points} />
+                                                  <ReadOnlyField label="Models" value={unit.modelCount} />
+                                               </div>
+                                               <ReadOnlyField label="Battle Traits" value={unit.traits} />
+                                               <ReadOnlyField label="Weapon Mods" value={unit.mods} />
+                                            </div>
+                                            <div className="space-y-4">
+                                               <ReadOnlyField label="Battle Scars" value={unit.scars} />
+                                               <ReadOnlyField label="Relics" value={unit.relics} />
+                                               <ReadOnlyField label="Enhancements" value={unit.enhancements} />
+                                               <ReadOnlyField label="Lore / Campaign Records" value={unit.customInfo} />
+                                            </div>
+                                         </div>
+                                      )}
+                                   </div>
+                                )) : (
+                                   <p className="text-xs text-zinc-600 italic">Geen eenheden geregistreerd in dit leger.</p>
+                                )}
+                             </div>
+                          </div>
+                       )}
+                    </div>
+                 ))}
+              </div>
+            )}
           </div>
         )}
 
@@ -911,5 +991,16 @@ function DonutChart({ data, size = 100, holeColor = '#09090b' }) {
       })}
       <circle cx="0" cy="0" r="0.65" fill={holeColor} />
     </svg>
+  );
+}
+
+function ReadOnlyField({ label, value }) {
+  return (
+    <div className="space-y-1">
+      <label className="text-[8px] font-black uppercase text-zinc-600 tracking-widest ml-1">{label}</label>
+      <div className="w-full bg-zinc-950 border border-zinc-800/50 p-3 rounded-xl text-[10px] text-zinc-400 min-h-[38px] whitespace-pre-wrap shadow-inner">
+         {value || '-'}
+      </div>
+    </div>
   );
 }
