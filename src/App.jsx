@@ -89,16 +89,25 @@ const WAYPOINTS = [
 ];
 
 const ARMAGEDDON_MISSIONS = [
-  { id: 1, name: "Supply Raid", background: "With Armageddon in sight, supply shortages are already crippling war efforts. Every recovered crate could decide a future battle.", rules: ["Command Phase (BR 2+): Gain 5 VP per objective (max 15 VP per turn)", "Action - Loot Supply: Shooting Phase. One unit per objective. +5 VP in no-man’s land, +8 VP in enemy deployment zone.", "Action completes at end of turn. Unit cannot shoot/charge."], reward: "Increase supply limit by 100 and 1 XP per unit that looted an objective" },
-  { id: 2, name: "Forward Recon", background: "Scouts push ahead to map terrain and locate enemy forces. Intelligence gained here will shape the coming war.", rules: ["Command Phase (BR 2+): 5 VP per objective (max 15). Home objectives 0 VP.", "End of Your Turn: +5 VP if units are in enemy deployment zone.", "End of Battle: +5 VP if units are in enemy deployment zone."], reward: "+3 XP to one CHARACTER. Next battle: 2 units gain Scout 6\"" },
-  { id: 3, name: "Secure Landing Zone", background: "Reinforcements depend on securing a stable landing zone.", rules: ["Command Phase (BR 2+): 5 VP per objective (max 15). +5VP for center.", "End of Battle: Control center for +20 VP."], reward: "Winner: +1 RP & +100 Supplies." },
-  { id: 4, name: "Sabotage Relay", background: "Communication relays coordinate entire fleets. Destroying them cripples an invasion.", rules: ["Action - Sabotage: Shooting phase. +5 VP / +8 VP. Each objective once.", "End of Battle: +3 VP per sabotaged objective control."], reward: "+2 XP per sabotaged objective (max 6XP total)." },
-  { id: 5, name: "Ambush Engagement", background: "A force is caught off guard and must react instantly.", rules: ["3 VP for each unit destroyed (max 15VP per turn)."], reward: "Token to ignore one Out of Action test. +3XP to unit with most kills." },
-  { id: 6, name: "Data Retrieval", background: "Ancient data cores hold secrets that shape the war.", rules: ["Action - Extract Data: +5 VP in no-mansland, +8VP in enemy zone."], reward: "Next battle: Opponent deploys 3 units first. One unit gains +2 XP." },
-  { id: 7, name: "Patrol Clash", background: "Two patrols collide unexpectedly. Survival decides the outcome.", rules: ["Eliminate opponent scout for 10VP. +2VP/turn if your scout lives.", "Monsters/Vehicles cannot be scouts."], reward: "Winner +1 RP. All surviving units: +1 XP." },
-  { id: 8, name: "Strategic Cache", background: "Hidden caches of weapons might contain a special weapon!", rules: ["Determine random objective in nomansland as cache.", "8 VP for cache, 2 VP for others."], reward: "One character gains an additional weapon modification." },
-  { id: 9, name: "Battlefield Salvage", background: "Wreckage still holds valuable wargear.", rules: ["Action – Salvage: Shooting phase. +5 VP / +8 VP.", "End of Battle: +2 VP per salvaged objective."], reward: "One Artificer level Relic." },
-  { id: 10, name: "Last Stand", background: "One force holds the line while others depart.", rules: ["Warlord Duel: 15 VP for enemy warlord, 20 VP for kill by own warlord."], reward: "Your warlord gains 5 XP." }
+  { id: 1, name: "Supply Raid", background: "With Armageddon in sight, supply shortages are reeds voelbaar. Elke krat is cruciaal.", rules: ["Command Phase: 5 VP per objective (max 15)", "Action: Loot Supply (Shooting phase). +5 VP in no-man's land, +8 VP in enemy zone."], reward: "Supply limit +100 & 1 XP per unit." },
+  { id: 2, name: "Forward Recon", background: "Scouts verkennen het terrein. Informatie is macht.", rules: ["End of Turn: +5 VP in enemy deployment zone.", "Command Phase: 5 VP per objective."], reward: "+3 XP to one CHARACTER." },
+  { id: 3, name: "Secure Landing Zone", background: "Versterkingen hebben een veilige plek nodig om te landen.", rules: ["Control center for +20 VP aan einde battle."], reward: "Winner: +1 RP & +100 Supplies." },
+  { id: 4, name: "Sabotage Relay", background: "Vernietig de communicatie van de vijand.", rules: ["Action: Sabotage (+5/+8 VP).", "End of Battle: +3 VP per sabotaged objective."], reward: "+2 XP per sabotaged objective." },
+  { id: 5, name: "Ambush Engagement", background: "Een verrassingsaanval in de as-woestijnen.", rules: ["3 VP per destroyed unit (max 15/turn)."], reward: "Token om Out of Action test te negeren." },
+  { id: 6, name: "Data Retrieval", background: "Oude data-cores bevatten geheimen van de sector.", rules: ["Action: Extract Data (+5/+8 VP)."], reward: "Next battle: Opponent deploys 3 units first." },
+  { id: 7, name: "Patrol Clash", background: "Twee patrouilles botsen onverwacht.", rules: ["Eliminate enemy scout: 10 VP.", "+2 VP per turn dat je eigen scout leeft."], reward: "Winner +1 RP. Surviving units +1 XP." },
+  { id: 8, name: "Strategic Cache", background: "Verborgen wapenvoorraden!", rules: ["Willekeurig objective is cache (8 VP), anderen 2 VP."], reward: "Een character krijgt extra weapon mod." },
+  { id: 9, name: "Battlefield Salvage", background: "Wrakstukken bevatten kostbare onderdelen.", rules: ["Action: Salvage (+5/+8 VP)."], reward: "One Artificer level Relic." },
+  { id: 10, name: "Last Stand", background: "Eén kracht houdt stand terwijl de rest evacueert.", rules: ["Warlord Duel: 15-20 VP voor uitschakelen warlord."], reward: "Warlord krijgt 5 XP." }
+];
+
+const RULES_DATA = [
+  { title: "Supply & Start", content: "Supply start op 500. De limit mag uitgebreid worden met RP." },
+  { title: "Punten & Veld", content: "500pts op 44x30. Daarboven volgens officiële regels." },
+  { title: "Upgrades & Scars", content: "Battle traits, mods en scars worden altijd RANDOM gerold." },
+  { title: "Toegestane Bronnen", content: "Core Crusade regels en Codexen. Geen specifieke campaign boeken." },
+  { title: "Spirit of the Crusade", content: "Lore en fun staan centraal, niet power-gaming." },
+  { title: "Voorbereiding", content: "Bouw je battlefield op basis van de lore en gebruik de missie roller." }
 ];
 
 export default function App() {
@@ -108,7 +117,7 @@ export default function App() {
   const [battleLogs, setBattleLogs] = useState([]);
   const [crusadeCards, setCrusadeCards] = useState([]);
   const [cardLogs, setCardLogs] = useState([]);
-  const [campaignState, setCampaignState] = useState({ aiSummary: "De archieven worden gescand door de Scribes van de Administratum...", lastUpdated: null });
+  const [campaignState, setCampaignState] = useState({ aiSummary: "De archieven worden gescand door de Scribes...", lastUpdated: null });
   
   // UI States
   const [rolledMission, setRolledMission] = useState(null);
@@ -118,6 +127,7 @@ export default function App() {
   const [statusMsg, setStatusMsg] = useState({ text: '', type: '' });
   const [isAdminAuthenticated, setIsAdminAuthenticated] = useState(false);
   const [adminInput, setAdminInput] = useState("");
+  const [isClaiming, setIsClaiming] = useState(false);
 
   // Form States
   const [newLore, setNewLore] = useState({ title: '', content: '', linkedBattleId: '' });
@@ -125,8 +135,6 @@ export default function App() {
   const [cardForm, setCardForm] = useState({ forceName: '', faction: '', superFaction: 'Imperium', playerName: '', supply: 500, rp: 0, crusadePoints: 0, secretKey: '' });
   const [claimForm, setClaimForm] = useState({ forceName: '', secretKey: '' });
   const [newUnitName, setNewUnitName] = useState('');
-
-  // Editing States (Admin)
   const [editingLore, setEditingLore] = useState(null);
 
   useEffect(() => {
@@ -157,7 +165,7 @@ export default function App() {
       return onSnapshot(q, (snap) => {
         const data = snap.docs.map(d => ({ id: d.id, ...d.data() }));
         if (col.name === 'cards') col.setter(data);
-        else col.setter(data.sort((a, b) => (b.timestamp || 0) - (a.timestamp || 0)));
+        else col.setter(data.sort((a, b) => (Number(b.timestamp) || 0) - (Number(a.timestamp) || 0)));
       }, (err) => console.error(err));
     });
 
@@ -166,10 +174,7 @@ export default function App() {
       if (doc.exists()) setCampaignState(doc.data());
     });
 
-    return () => {
-      unsubs.forEach(un => un());
-      unsubState();
-    };
+    return () => { unsubs.forEach(un => un()); unsubState(); };
   }, [user]);
 
   const showStatus = (text, type = 'info') => {
@@ -186,10 +191,9 @@ export default function App() {
           headers: { 'Content-Type': 'application/json' },
           body: JSON.stringify({
             contents: [{ parts: [{ text: prompt }] }],
-            systemInstruction: { parts: [{ text: "Je bent een keizerlijke scribe van de Administratum in het 41e millennium. Jouw taak is om een sfeervol, duister en heroïsch samenvattend verslag te schrijven van de huidige status van de Armageddon Crusade. Schrijf uitsluitend in het Nederlands. Gebruik termen als 'Vox-transmissies', 'Gezegend zij de Keizer', 'Het bloed van martelaren' etc. Houd het onder de 250 woorden." }] }
+            systemInstruction: { parts: [{ text: "Je bent een keizerlijke scribe van de Administratum. Schrijf een sfeervol verslag van de Armageddon Crusade in het Nederlands op basis van de beschikbare informatie in lore tab en uitgevochten battles in battle log. Gebruik 40k termen. Houd het onder de 250 woorden." }] }
           })
         });
-        if (!response.ok) throw new Error('API error');
         const result = await response.json();
         return result.candidates?.[0]?.content?.parts?.[0]?.text;
       } catch (err) {
@@ -203,12 +207,11 @@ export default function App() {
     setIsProcessing(true);
     showStatus("De Scribes raadplegen de data-taps...");
     try {
-      const recentBattles = battleLogs.slice(0, 10).map(b => `${b.attacker} vs ${b.defender} (Winnaar: ${b.winner})`).join(', ');
-      const recentLore = loreEntries.slice(0, 5).map(l => `${l.title}: ${l.content.substring(0, 100)}...`).join(' | ');
-      const factions = crusadeCards.map(c => `${c.forceName} (${c.superFaction})`).join(', ');
-      const prompt = `Schrijf een campagne-update. Actieve legers: ${factions}. Recente veldslagen: ${recentBattles}. Belangrijke lore: ${recentLore}. Wie wint terrein? Welke duisternis dreigt?`;
+      const recentBattles = battleLogs.slice(0, 10).map(b => `${b.attacker} vs ${b.defender} (Win: ${b.winner})`).join(', ');
+      const recentLore = loreEntries.slice(0, 5).map(l => `${l.title}: ${String(l.content).substring(0, 100)}...`).join(' | ');
+      const prompt = `Update van de oorlog. Legers: ${crusadeCards.map(c => c.forceName).join(', ')}. Gevechten: ${recentBattles}. Belangrijke lore: ${recentLore}. Wat is de status?`;
       const aiText = await callGeminiWithRetry(prompt);
-      await setDoc(doc(db, 'artifacts', appId, 'public', 'data', 'state', 'campaign'), { aiSummary: aiText, lastUpdated: Date.now() });
+      await setDoc(doc(db, 'artifacts', appId, 'public', 'data', 'state', 'campaign'), { aiSummary: String(aiText), lastUpdated: Date.now() });
       showStatus("Chronicles bijgewerkt!");
     } catch (err) { showStatus("AI Vox-storing.", "error"); }
     finally { setIsProcessing(false); }
@@ -218,7 +221,7 @@ export default function App() {
   const handleUpdateCard = async (cardId, updates, logMsg) => {
     try {
       await updateDoc(doc(db, 'artifacts', appId, 'public', 'data', 'cards', cardId), updates);
-      if (logMsg) await addDoc(collection(db, 'artifacts', appId, 'public', 'data', 'cardLogs'), { cardId, message: logMsg, owner: user.uid, timestamp: Date.now() });
+      if (logMsg) await addDoc(collection(db, 'artifacts', appId, 'public', 'data', 'cardLogs'), { cardId, message: String(logMsg), owner: user.uid, timestamp: Date.now() });
     } catch (e) { showStatus("Update mislukt.", "error"); }
   };
 
@@ -227,21 +230,19 @@ export default function App() {
     setIsProcessing(true);
     try {
       await addDoc(collection(db, 'artifacts', appId, 'public', 'data', 'cards'), { ...cardForm, owner: user.uid, timestamp: Date.now(), units: [] });
-      showStatus("Crusade Card aangemaakt!");
+      showStatus("Crusade Card geregistreerd!");
     } catch (e) { showStatus("Fout bij aanmaken.", "error"); }
     finally { setIsProcessing(false); }
   };
 
   const handleClaimForce = async (e) => {
     e.preventDefault();
-    setIsProcessing(true);
-    const target = crusadeCards.find(c => c.forceName.toLowerCase() === claimForm.forceName.toLowerCase() && c.secretKey === claimForm.secretKey);
+    const target = crusadeCards.find(c => String(c.forceName).toLowerCase() === claimForm.forceName.toLowerCase() && c.secretKey === claimForm.secretKey);
     if (target) {
       await updateDoc(doc(db, 'artifacts', appId, 'public', 'data', 'cards', target.id), { owner: user.uid });
       showStatus("Beheer hersteld!");
-      setActiveTab('cards');
-    } else { showStatus("Onjuiste data.", "error"); }
-    setIsProcessing(false);
+      setIsClaiming(false);
+    } else { showStatus("Gegevens onjuist.", "error"); }
   };
 
   const handleCreateUnit = async (card) => {
@@ -283,34 +284,69 @@ export default function App() {
         });
         await updateDoc(doc(db, 'artifacts', appId, 'public', 'data', 'battles', battleRef.id), { linkedLoreId: loreRef.id });
       }
-      showStatus("Engagement gelogd!");
+      showStatus("Battle Resultaat opgeslagen!");
       setBattleForm({ attackerId: '', defenderId: '', winnerId: '', writeLoreNow: false, loreTitle: '', loreContent: '' });
-    } catch(e) { showStatus("Fout bij loggen.", "error"); }
+    } catch(e) { showStatus("Fout bij opslaan.", "error"); }
     finally { setIsProcessing(false); }
   };
 
-  // --- ADMIN ACTIONS ---
+  const handleCreateLore = async (e) => {
+    e.preventDefault();
+    setIsProcessing(true);
+    try {
+      await addDoc(collection(db, 'artifacts', appId, 'public', 'data', 'lore'), { 
+        ...newLore, author: user.uid, forceName: myCard.forceName, superFaction: myCard.superFaction, timestamp: Date.now() 
+      });
+      setNewLore({ title: '', content: '', linkedBattleId: '' });
+      showStatus("Lore gepubliceerd!");
+    } catch(e) { showStatus("Fout bij lore.", "error"); }
+    finally { setIsProcessing(false); }
+  };
+
   const handleAdminLogin = (e) => {
     e.preventDefault();
-    if (adminInput === ADMIN_PASSWORD) { setIsAdminAuthenticated(true); showStatus("Admin-modus actief."); }
-    else { showStatus("Wachtwoord onjuist.", "error"); }
+    if (adminInput === ADMIN_PASSWORD) {
+      setIsAdminAuthenticated(true);
+      showStatus("Admin protocol ontgrendeld.");
+    } else {
+      showStatus("Onjuist wachtwoord.", "error");
+    }
   };
 
   const deleteDocument = async (colName, id) => {
     if (!window.confirm(`Definitief verwijderen?`)) return;
     try {
       await deleteDoc(doc(db, 'artifacts', appId, 'public', 'data', colName, id));
-      showStatus("Verwijderd.");
-    } catch (e) { showStatus("Fout.", "error"); }
+      showStatus("Document vernietigd.");
+    } catch (e) { showStatus("Verwijderen mislukt.", "error"); }
   };
 
   const myCard = crusadeCards.find(c => c.owner === user?.uid);
   const combinedEvents = [
     ...loreEntries.map(e => ({ ...e, type: 'lore' })),
     ...battleLogs.map(e => ({ ...e, type: 'battle' }))
-  ].sort((a, b) => (b.timestamp || 0) - (a.timestamp || 0)).slice(0, 3);
+  ].sort((a, b) => (Number(b.timestamp) || 0) - (Number(a.timestamp) || 0)).slice(0, 3);
 
-  if (!user) return <div className="min-h-screen bg-zinc-950 flex flex-col items-center justify-center text-orange-500 font-mono italic"><Skull size={40} className="animate-pulse mb-4" /> VERBINDEN...</div>;
+  const getFactionTextColor = (fac) => {
+    if (fac === 'Imperium') return 'text-blue-400';
+    if (fac === 'Chaos') return 'text-red-400';
+    if (fac === 'Xenos') return 'text-green-400';
+    return 'text-orange-500';
+  };
+
+  const factionColors = { 'Imperium': '#3b82f6', 'Chaos': '#ef4444', 'Xenos': '#22c55e' };
+  const forceDistribution = [
+    { label: 'Imperium', value: crusadeCards.filter(c => c.superFaction === 'Imperium').length, color: factionColors['Imperium'] },
+    { label: 'Chaos', value: crusadeCards.filter(c => c.superFaction === 'Chaos').length, color: factionColors['Chaos'] },
+    { label: 'Xenos', value: crusadeCards.filter(c => c.superFaction === 'Xenos').length, color: factionColors['Xenos'] }
+  ];
+  const winDistribution = [
+    { label: 'Imperium', value: battleLogs.filter(b => b.winnerSuperFaction === 'Imperium').length, color: factionColors['Imperium'] },
+    { label: 'Chaos', value: battleLogs.filter(b => b.winnerSuperFaction === 'Chaos').length, color: factionColors['Chaos'] },
+    { label: 'Xenos', value: battleLogs.filter(b => b.winnerSuperFaction === 'Xenos').length, color: factionColors['Xenos'] }
+  ];
+
+  if (!user) return <div className="min-h-screen bg-zinc-950 flex flex-col items-center justify-center text-orange-500 font-mono italic"><Skull size={40} className="animate-pulse mb-4" /> INITIALISEREN...</div>;
 
   return (
     <>
@@ -351,6 +387,7 @@ export default function App() {
           { id: 'lore', icon: ScrollText, label: 'Lore Hub' },
           { id: 'logs', icon: History, label: 'Battles' },
           { id: 'leaderboard', icon: Medal, label: 'Rangen' },
+          { id: 'regels', icon: BookOpen, label: 'Regels' },
           { id: 'admin', icon: isAdminAuthenticated ? Unlock : Lock, label: 'Admin' }
         ].map(t => (
           <button key={t.id} onClick={() => setActiveTab(t.id)} className={`flex-1 min-w-[80px] py-3 flex flex-col items-center justify-center transition-all ${activeTab === t.id ? 'text-orange-500 bg-orange-500/5 border-b-2 border-orange-500' : 'text-zinc-600 border-b-2 border-transparent hover:text-zinc-400'}`}>
@@ -373,29 +410,75 @@ export default function App() {
                </div>
                <div className="bg-zinc-950/80 p-6 rounded-2xl border border-zinc-800 relative shadow-inner">
                   <div className="absolute top-2 right-4 text-[7px] font-mono text-zinc-600 uppercase">Vox: {campaignState.lastUpdated ? new Date(campaignState.lastUpdated).toLocaleString() : 'Antieke Data'}</div>
-                  <p className="text-zinc-300 text-sm leading-relaxed italic whitespace-pre-wrap">{campaignState.aiSummary}</p>
+                  <p className="text-zinc-300 text-sm leading-relaxed italic whitespace-pre-wrap">{String(campaignState.aiSummary || "")}</p>
                </div>
             </div>
 
             <div className="bg-zinc-900 border border-zinc-800 p-8 rounded-[2.5rem] shadow-2xl relative overflow-hidden">
                <div className="absolute top-0 left-0 w-1.5 h-full bg-orange-600"></div>
-               <h2 className="text-2xl font-black uppercase italic mb-3 tracking-tighter text-white">De Race naar Armageddon</h2>
-               <div className="space-y-10 mt-8">
+               <h2 className="text-2xl font-black uppercase italic mb-8 tracking-tighter text-white">De Race naar Armageddon</h2>
+               <div className="space-y-10">
                   {['Imperium', 'Chaos', 'Xenos'].map(faction => {
                      const wins = battleLogs.filter(b => b.winnerSuperFaction === faction).length;
                      const progress = Math.min(100, (wins / CAMPAIGN_MAX_WINS) * 100);
+                     const textColor = faction === 'Imperium' ? 'text-blue-500' : faction === 'Chaos' ? 'text-red-500' : 'text-green-500';
+                     const bgColor = faction === 'Imperium' ? 'bg-blue-600' : faction === 'Chaos' ? 'bg-red-600' : 'bg-green-600';
+
                      return (
                         <div key={faction} className="relative">
                            <div className="flex justify-between items-end mb-2">
-                              <span className={`text-[10px] font-black uppercase tracking-widest ${faction === 'Imperium' ? 'text-blue-500' : faction === 'Chaos' ? 'text-red-500' : 'text-green-500'}`}>{faction} Vloot</span>
+                              <span className={`text-[10px] font-black uppercase tracking-widest ${textColor}`}>{faction} Vloot</span>
                               <span className="text-[10px] font-mono text-zinc-500">{wins} / {CAMPAIGN_MAX_WINS} Zeges</span>
                            </div>
                            <div className="relative h-2 bg-zinc-950 rounded-full border border-zinc-800">
-                              <div className={`absolute top-0 left-0 h-full rounded-full transition-all duration-1000 ${faction === 'Imperium' ? 'bg-blue-600' : faction === 'Chaos' ? 'bg-red-600' : 'bg-green-600'}`} style={{ width: `${progress}%` }}></div>
+                              <div className={`absolute top-0 left-0 h-full rounded-full transition-all duration-1000 ${bgColor}`} style={{ width: `${progress}%` }}></div>
+                              <div className="absolute -top-[5px] left-0 w-full h-full pointer-events-none">
+                                 {WAYPOINTS.map((wp, idx) => (
+                                    <div key={idx} className="absolute top-0 flex flex-col items-center" style={{ left: `${wp.percent}%`, transform: wp.percent === 100 ? 'translateX(-100%)' : (wp.percent === 0 ? 'translateX(0)' : 'translateX(-50%)') }}>
+                                       <div className={`w-3 h-3 rounded-full border-2 border-zinc-950 ${progress >= wp.percent ? bgColor : 'bg-zinc-800'}`}></div>
+                                       <span className={`text-[7px] uppercase font-bold mt-2 whitespace-nowrap ${progress >= wp.percent ? textColor : 'text-zinc-600'}`}>{wp.name}</span>
+                                    </div>
+                                 ))}
+                              </div>
                            </div>
                         </div>
                      )
                   })}
+               </div>
+            </div>
+
+            <div className="grid grid-cols-1 md:grid-cols-2 gap-4">
+               <div className="bg-zinc-900 border border-zinc-800 p-6 rounded-[2rem] flex flex-col items-center">
+                  <h3 className="text-[10px] font-black uppercase text-zinc-500 tracking-widest mb-4">Forces on Armageddon</h3>
+                  <div className="w-32 h-32 mb-4"><DonutChart data={forceDistribution} holeColor="#18181b" /></div>
+                  <div className="flex gap-4 text-[10px] font-black uppercase tracking-widest">
+                     <span className="text-blue-500">Imp {forceDistribution[0].value}</span>
+                     <span className="text-red-500">Cha {forceDistribution[1].value}</span>
+                     <span className="text-green-500">Xen {forceDistribution[2].value}</span>
+                  </div>
+               </div>
+               <div className="bg-zinc-900 border border-zinc-800 p-6 rounded-[2rem] flex flex-col items-center">
+                  <h3 className="text-[10px] font-black uppercase text-zinc-500 tracking-widest mb-4">Battle Victories</h3>
+                  <div className="w-32 h-32 mb-4"><DonutChart data={winDistribution} holeColor="#18181b" /></div>
+                  <div className="flex gap-4 text-[10px] font-black uppercase tracking-widest">
+                     <span className="text-blue-500">Imp {winDistribution[0].value}</span>
+                     <span className="text-red-500">Cha {winDistribution[1].value}</span>
+                     <span className="text-green-500">Xen {winDistribution[2].value}</span>
+                  </div>
+               </div>
+            </div>
+
+            <div className="bg-zinc-900 border border-zinc-800 p-6 rounded-[2rem]">
+               <h3 className="text-xs font-black uppercase mb-4 text-zinc-500">Recente Gebeurtenissen</h3>
+               <div className="space-y-3">
+                  {combinedEvents.map((ev, i) => (
+                     <div key={i} className="text-xs border-l-2 border-orange-600 pl-3 py-1">
+                        <span className="block text-[8px] opacity-30 uppercase">{new Date(ev.timestamp).toLocaleDateString()}</span>
+                        <p className="italic text-zinc-400">
+                           {ev.type === 'lore' ? `Lore: ${String(ev.title)}` : `Battle: ${String(ev.winner)} zegeviert`}
+                        </p>
+                     </div>
+                  ))}
                </div>
             </div>
           </div>
@@ -407,33 +490,42 @@ export default function App() {
             {!myCard ? (
               <div className="bg-zinc-900 border-2 border-zinc-800 rounded-[2rem] p-8 text-center">
                 <Skull className="mx-auto mb-4 text-zinc-700" size={40}/>
-                <h3 className="font-black uppercase text-xl text-orange-500 mb-6">Registreer je Crusade Force</h3>
-                <form onSubmit={handleCreateCard} className="grid grid-cols-1 md:grid-cols-2 gap-4 text-left">
-                  <input type="text" placeholder="Force Naam" className="bg-zinc-950 p-4 rounded-xl border border-zinc-800" onChange={e => setCardForm({...cardForm, forceName: e.target.value})} required />
-                  <input type="text" placeholder="Faction" className="bg-zinc-950 p-4 rounded-xl border border-zinc-800" onChange={e => setCardForm({...cardForm, faction: e.target.value})} required />
-                  <select className="bg-zinc-950 p-4 rounded-xl border border-zinc-800 text-zinc-300" value={cardForm.superFaction} onChange={e => setCardForm({...cardForm, superFaction: e.target.value})}>
-                    <option value="Imperium">Imperium</option>
-                    <option value="Chaos">Chaos</option>
-                    <option value="Xenos">Xenos</option>
-                  </select>
-                  <input type="text" placeholder="Naam Commandeur" className="bg-zinc-950 p-4 rounded-xl border border-zinc-800" onChange={e => setCardForm({...cardForm, playerName: e.target.value})} required />
-                  <input type="password" placeholder="Toegangscode" className="md:col-span-2 bg-zinc-950 p-4 rounded-xl border border-zinc-800" onChange={e => setCardForm({...cardForm, secretKey: e.target.value})} required />
-                  <button className="md:col-span-2 bg-orange-600 p-4 rounded-xl font-black uppercase text-xs">Start Crusade</button>
-                </form>
-                <div className="mt-8 pt-8 border-t border-zinc-800">
-                   <p className="text-zinc-500 text-xs mb-4">Reeds een leger? Herstel toegang:</p>
-                   <div className="flex gap-2 max-w-sm mx-auto">
-                      <input type="text" placeholder="Exacte Force Naam" className="flex-1 bg-zinc-950 p-3 rounded-xl border border-zinc-800 text-xs" onChange={e => setClaimForm({...claimForm, forceName: e.target.value})}/>
-                      <input type="password" placeholder="Code" className="w-24 bg-zinc-950 p-3 rounded-xl border border-zinc-800 text-xs" onChange={e => setClaimForm({...claimForm, secretKey: e.target.value})}/>
-                      <button onClick={handleClaimForce} className="bg-zinc-100 text-zinc-950 px-4 rounded-xl font-bold text-[10px]">HERSTEL</button>
-                   </div>
-                </div>
+                {!isClaiming ? (
+                  <>
+                    <h3 className="font-black uppercase text-xl text-orange-500 mb-6">Registreer je Crusade Force</h3>
+                    <form onSubmit={handleCreateCard} className="grid grid-cols-1 md:grid-cols-2 gap-4 text-left">
+                      <input type="text" placeholder="Force Naam" className="bg-zinc-950 p-4 rounded-xl border border-zinc-800 outline-none focus:border-orange-500" onChange={e => setCardForm({...cardForm, forceName: e.target.value})} required />
+                      <input type="text" placeholder="Faction" className="bg-zinc-950 p-4 rounded-xl border border-zinc-800 outline-none focus:border-orange-500" onChange={e => setCardForm({...cardForm, faction: e.target.value})} required />
+                      <select className="bg-zinc-950 p-4 rounded-xl border border-zinc-800 text-zinc-300 outline-none" value={cardForm.superFaction} onChange={e => setCardForm({...cardForm, superFaction: e.target.value})}>
+                        <option value="Imperium">Imperium</option>
+                        <option value="Chaos">Chaos</option>
+                        <option value="Xenos">Xenos</option>
+                      </select>
+                      <input type="text" placeholder="Naam Commandeur" className="bg-zinc-950 p-4 rounded-xl border border-zinc-800 outline-none focus:border-orange-500" onChange={e => setCardForm({...cardForm, playerName: e.target.value})} required />
+                      <input type="password" placeholder="Toegangscode" className="md:col-span-2 bg-zinc-950 p-4 rounded-xl border border-zinc-800 outline-none focus:border-orange-500" onChange={e => setCardForm({...cardForm, secretKey: e.target.value})} required />
+                      <button className="md:col-span-2 bg-orange-600 p-4 rounded-xl font-black uppercase text-xs hover:bg-orange-500">Start Crusade</button>
+                    </form>
+                    <button onClick={() => setIsClaiming(true)} className="mt-8 text-zinc-500 text-[10px] uppercase font-black hover:text-white">Heb je al een leger? Herstel toegang</button>
+                  </>
+                ) : (
+                  <>
+                    <h3 className="font-black uppercase text-xl text-orange-500 mb-6">Herstel Toegang</h3>
+                    <form onSubmit={handleClaimForce} className="space-y-4 max-w-sm mx-auto text-left">
+                       <input type="text" placeholder="Exacte Force Naam" className="w-full bg-zinc-950 p-4 rounded-xl border border-zinc-800 text-sm outline-none" onChange={e => setClaimForm({...claimForm, forceName: e.target.value})} required />
+                       <input type="password" placeholder="Jouw Code" className="w-full bg-zinc-950 p-4 rounded-xl border border-zinc-800 text-sm outline-none" onChange={e => setClaimForm({...claimForm, secretKey: e.target.value})} required />
+                       <div className="flex gap-2">
+                          <button className="flex-1 bg-zinc-100 text-zinc-950 p-4 rounded-xl font-bold text-xs uppercase">Herstel</button>
+                          <button type="button" onClick={() => setIsClaiming(false)} className="flex-1 bg-zinc-800 p-4 rounded-xl font-bold text-xs uppercase">Terug</button>
+                       </div>
+                    </form>
+                  </>
+                )}
               </div>
             ) : (
               <div className="bg-zinc-900 border-2 border-orange-600 rounded-[2.5rem] overflow-hidden shadow-2xl">
                 <div className="p-8 bg-zinc-950/50 border-b border-zinc-800 flex justify-between items-start flex-wrap gap-4">
                   <div>
-                    <h3 className="text-3xl font-black uppercase italic tracking-tighter flex items-center gap-2">{myCard.forceName} <button onClick={() => window.print()} title="Print Roster" className="text-zinc-600 hover:text-white"><Printer size={16}/></button></h3>
+                    <h3 className="text-3xl font-black uppercase italic tracking-tighter flex items-center gap-2">{myCard.forceName} <button onClick={() => window.print()} title="Print Roster" className="text-zinc-600 hover:text-white transition-all"><Printer size={16}/></button></h3>
                     <p className="text-zinc-500 text-xs font-bold uppercase">{myCard.faction} | {myCard.playerName}</p>
                   </div>
                   <div className="flex gap-4">
@@ -445,15 +537,17 @@ export default function App() {
 
                 <div className="p-6 grid grid-cols-1 md:grid-cols-2 gap-4 border-b border-zinc-800 bg-zinc-900/20">
                    <div className="grid grid-cols-2 gap-2">
-                      <button onClick={() => handleUpdateCard(myCard.id, { rp: (myCard.rp || 0) + 1 }, "+1 RP added")} className="bg-zinc-800 p-2 rounded-lg text-[9px] font-black uppercase border border-zinc-700">+1 RP</button>
-                      <button onClick={() => handleUpdateCard(myCard.id, { rp: Math.max(0, (myCard.rp || 0) - 1) }, "-1 RP spent")} className="bg-zinc-800 p-2 rounded-lg text-[9px] font-black uppercase border border-zinc-700">-1 RP</button>
-                      <button onClick={() => handleUpdateCard(myCard.id, { supply: (myCard.supply || 0) + 100 }, "+100 Supply")} className="bg-zinc-800 p-2 rounded-lg text-[9px] font-black uppercase border border-zinc-700">+100 Sup</button>
-                      <button onClick={() => handleUpdateCard(myCard.id, { supply: Math.max(0, (myCard.supply || 0) - 100) }, "-100 Supply")} className="bg-zinc-800 p-2 rounded-lg text-[9px] font-black uppercase border border-zinc-700">-100 Sup</button>
+                      <button onClick={() => handleUpdateCard(myCard.id, { rp: (myCard.rp || 0) + 1 }, "+1 RP toegevoegd")} className="bg-zinc-800 p-2 rounded-lg text-[9px] font-black uppercase border border-zinc-700 hover:bg-zinc-700 transition-all">+1 RP</button>
+                      <button onClick={() => handleUpdateCard(myCard.id, { rp: Math.max(0, (myCard.rp || 0) - 1) }, "-1 RP gebruikt")} className="bg-zinc-800 p-2 rounded-lg text-[9px] font-black uppercase border border-zinc-700 hover:bg-zinc-700 transition-all">-1 RP</button>
+                      <button onClick={() => handleUpdateCard(myCard.id, { supply: (myCard.supply || 0) + 100 }, "+100 Supply limiet")} className="bg-zinc-800 p-2 rounded-lg text-[9px] font-black uppercase border border-zinc-700 hover:bg-zinc-700 transition-all">+100 Sup</button>
+                      <button onClick={() => handleUpdateCard(myCard.id, { supply: Math.max(0, (myCard.supply || 0) - 100) }, "-100 Supply limiet")} className="bg-zinc-800 p-2 rounded-lg text-[9px] font-black uppercase border border-zinc-700 hover:bg-zinc-700 transition-all">-100 Sup</button>
+                      <button onClick={() => handleUpdateCard(myCard.id, { crusadePoints: (myCard.crusadePoints || 0) + 1 }, "+1 Crusade Point toegevoegd")} className="bg-blue-900/30 p-2 rounded-lg text-[9px] font-black uppercase border border-blue-900/50 hover:bg-blue-900/50 text-blue-400 transition-all">+1 Point</button>
+                      <button onClick={() => handleUpdateCard(myCard.id, { crusadePoints: Math.max(0, (myCard.crusadePoints || 0) - 1) }, "-1 Crusade Point verwijderd")} className="bg-blue-900/30 p-2 rounded-lg text-[9px] font-black uppercase border border-blue-900/50 hover:bg-blue-900/50 text-blue-400 transition-all">-1 Point</button>
                    </div>
                    <div className="bg-zinc-950 p-4 rounded-xl border border-zinc-800 h-24 overflow-y-auto no-scrollbar">
                       <h4 className="text-[8px] font-black uppercase text-zinc-600 mb-2">History Log</h4>
                       {cardLogs.filter(l => l.cardId === myCard.id).map((l, idx) => (
-                         <div key={idx} className="text-[9px] text-zinc-500 italic mb-1 border-l border-orange-500/30 pl-2">{l.message}</div>
+                         <div key={idx} className="text-[9px] text-zinc-500 italic mb-1 border-l border-orange-500/30 pl-2">{String(l.message)}</div>
                       ))}
                    </div>
                 </div>
@@ -465,9 +559,9 @@ export default function App() {
                   </div>
                   {isAddingUnit && (
                     <div className="flex gap-2 animate-in slide-in-from-right-2">
-                      <input type="text" placeholder="Unit Naam..." className="flex-1 bg-zinc-950 border border-zinc-800 p-2 rounded-lg text-xs" value={newUnitName} onChange={e => setNewUnitName(e.target.value)} autoFocus />
-                      <button onClick={() => handleCreateUnit(myCard)} className="bg-green-600 p-2 rounded-lg"><Check size={14}/></button>
-                      <button onClick={() => setIsAddingUnit(false)} className="bg-zinc-800 p-2 rounded-lg"><X size={14}/></button>
+                      <input type="text" placeholder="Unit Naam..." className="flex-1 bg-zinc-950 border border-zinc-800 p-2 rounded-lg text-xs outline-none focus:border-orange-500" value={newUnitName} onChange={e => setNewUnitName(e.target.value)} autoFocus />
+                      <button onClick={() => handleCreateUnit(myCard)} className="bg-green-600 p-2 rounded-lg transition-all hover:bg-green-500"><Check size={14}/></button>
+                      <button onClick={() => setIsAddingUnit(false)} className="bg-zinc-800 p-2 rounded-lg transition-all hover:bg-zinc-700"><X size={14}/></button>
                     </div>
                   )}
                   <div className="space-y-4">
@@ -476,15 +570,22 @@ export default function App() {
                         <div className="p-4 flex justify-between items-center bg-zinc-900/10">
                           <div className="flex items-center gap-4 flex-wrap">
                             <span className="text-orange-500 font-black text-xs px-2 py-1 bg-orange-500/5 rounded border border-orange-500/20">{unit.xp} XP</span>
-                            <h5 className="font-black uppercase flex items-center gap-2">{unit.name} {unit.isWarlord && <Crown size={14} className="text-yellow-500"/>}</h5>
+                            <h5 className="font-black uppercase flex items-center gap-2">{String(unit.name)} {unit.isWarlord && <Crown size={14} className="text-yellow-500"/>}</h5>
                             <div className="flex gap-4 text-[9px] text-zinc-600 font-bold uppercase">
                                <span><Skull size={10} className="inline mr-1"/> {unit.killTally || 0} Kills</span>
                                <span><Coins size={10} className="inline mr-1"/> {unit.points || 0} pts</span>
                             </div>
                           </div>
                           <div className="flex items-center gap-2">
-                             <button onClick={() => handleToggleWarlord(myCard, unit.id)} className={`p-2 transition-colors ${unit.isWarlord ? 'text-yellow-500' : 'text-zinc-700 hover:text-yellow-500'}`}><Crown size={16}/></button>
-                             <button onClick={() => setExpandedUnit(expandedUnit === unit.id ? null : unit.id)} className="p-2 text-zinc-500 group-hover:text-white transition-all"><ChevronDown size={16}/></button>
+                             <button onClick={() => handleToggleWarlord(myCard, unit.id)} title="Mark as Warlord" className={`p-2 transition-colors ${unit.isWarlord ? 'text-yellow-500' : 'text-zinc-700 hover:text-yellow-500'}`}><Crown size={16}/></button>
+                             <button onClick={() => setExpandedUnit(expandedUnit === unit.id ? null : unit.id)} className="p-2 text-zinc-500 group-hover:text-white transition-all">
+                               {expandedUnit === unit.id ? <ChevronUp size={16}/> : <ChevronDown size={16}/>}
+                             </button>
+                             <button onClick={async () => {
+                                if(!window.confirm("Unit verwijderen?")) return;
+                                const updated = myCard.units.filter(u => u.id !== unit.id);
+                                await handleUpdateCard(myCard.id, { units: updated }, `Unit verwijderd: ${unit.name}`);
+                             }} className="p-2 text-zinc-800 hover:text-red-500 transition-colors"><Trash2 size={16}/></button>
                           </div>
                         </div>
                         {expandedUnit === unit.id && (
@@ -497,13 +598,13 @@ export default function App() {
                                   <UnitField label="Models" type="number" value={unit.modelCount} onChange={v => handleUpdateUnit(myCard, unit.id, 'modelCount', parseInt(v) || 1)} />
                                </div>
                                <UnitField label="Battle Traits" value={unit.traits} onChange={v => handleUpdateUnit(myCard, unit.id, 'traits', v)} />
-                               <UnitField label="Weapon Modifications" value={unit.mods} onChange={v => handleUpdateUnit(myCard, unit.id, 'mods', v)} />
+                               <UnitField label="Weapon Mods" value={unit.mods} onChange={v => handleUpdateUnit(myCard, unit.id, 'mods', v)} />
                             </div>
                             <div className="space-y-4">
                                <UnitField label="Battle Scars" value={unit.scars} onChange={v => handleUpdateUnit(myCard, unit.id, 'scars', v)} />
                                <UnitField label="Relics" value={unit.relics} onChange={v => handleUpdateUnit(myCard, unit.id, 'relics', v)} />
                                <UnitField label="Enhancements" value={unit.enhancements} onChange={v => handleUpdateUnit(myCard, unit.id, 'enhancements', v)} />
-                               <UnitField label="Unit Records / Lore" area value={unit.customInfo} onChange={v => handleUpdateUnit(myCard, unit.id, 'customInfo', v)} />
+                               <UnitField label="Lore / Campaign Records" area value={unit.customInfo} onChange={v => handleUpdateUnit(myCard, unit.id, 'customInfo', v)} />
                             </div>
                           </div>
                         )}
@@ -516,23 +617,44 @@ export default function App() {
           </div>
         )}
 
+        {/* MISSION GENERATOR */}
+        {activeTab === 'generator' && (
+          <div className="text-center py-6 space-y-8 animate-in zoom-in-95">
+            <button onClick={() => setRolledMission(ARMAGEDDON_MISSIONS[Math.floor(Math.random() * ARMAGEDDON_MISSIONS.length)])} className="bg-orange-600 p-5 px-12 rounded-full shadow-2xl uppercase tracking-widest text-xs font-black flex items-center gap-4 mx-auto hover:bg-orange-500 transition-all active:scale-95">
+              <Dices size={24} /> Roll Tactical Mission
+            </button>
+            {rolledMission && (
+              <div className="bg-zinc-900 border border-orange-500/20 p-8 rounded-[2.5rem] text-left relative overflow-hidden shadow-2xl space-y-6">
+                <div className="absolute top-0 left-0 w-full h-2 bg-orange-600"></div>
+                <h3 className="text-3xl font-black uppercase italic tracking-tighter text-orange-500">{rolledMission.name}</h3>
+                <div className="bg-zinc-950/60 p-5 rounded-2xl border border-zinc-800/50"><p className="text-zinc-400 italic text-sm leading-relaxed">{rolledMission.background}</p></div>
+                <div className="space-y-4">
+                   <h4 className="text-[10px] font-black uppercase text-zinc-500 flex items-center gap-2"><Zap size={14}/> Scoring:</h4>
+                   <ul className="space-y-3">{rolledMission.rules.map((r, i) => (<li key={i} className="flex gap-3 text-xs italic leading-relaxed"><span className="text-orange-600 font-black">•</span>{r}</li>))}</ul>
+                </div>
+                <div className="bg-orange-600/10 border border-orange-500/30 p-5 rounded-2xl"><h4 className="text-[10px] font-black uppercase text-orange-500 mb-2 flex items-center gap-2"><Trophy size={14}/> Reward:</h4><p className="text-white font-bold text-sm italic">{rolledMission.reward}</p></div>
+              </div>
+            )}
+          </div>
+        )}
+
         {/* LORE HUB */}
         {activeTab === 'lore' && (
           <div className="space-y-6 animate-in fade-in">
             {myCard && (
                <form onSubmit={handleCreateLore} className="bg-zinc-900 p-6 rounded-3xl border border-zinc-800 space-y-4 shadow-xl">
                  <h3 className="font-black uppercase text-[10px] text-zinc-500 flex items-center gap-2"><ScrollText size={14} className="text-orange-500"/> Nieuwe Transmissie</h3>
-                 <input type="text" placeholder="Titel..." className="w-full bg-zinc-950 border border-zinc-800 p-4 rounded-xl text-sm" value={newLore.title} onChange={e => setNewLore({...newLore, title: e.target.value})} required />
-                 <textarea placeholder="Verslag..." className="w-full bg-zinc-950 border border-zinc-800 p-4 rounded-xl text-sm h-32" value={newLore.content} onChange={e => setNewLore({...newLore, content: e.target.value})} required />
-                 <button className="w-full bg-orange-600 p-4 rounded-xl font-black uppercase text-xs">Publish transmission</button>
+                 <input type="text" placeholder="Titel..." className="w-full bg-zinc-950 border border-zinc-800 p-4 rounded-xl text-sm outline-none focus:border-orange-500" value={newLore.title} onChange={e => setNewLore({...newLore, title: e.target.value})} required />
+                 <textarea placeholder="Verslag van de strijd..." className="w-full bg-zinc-950 border border-zinc-800 p-4 rounded-xl text-sm h-32 outline-none focus:border-orange-500" value={newLore.content} onChange={e => setNewLore({...newLore, content: e.target.value})} required />
+                 <button className="w-full bg-orange-600 p-4 rounded-xl font-black uppercase text-xs transition-all hover:bg-orange-500">Publish transmission</button>
                </form>
             )}
             <div className="space-y-4">
               {loreEntries.map(e => (
-                <article key={e.id} className="bg-zinc-900/40 p-8 rounded-[2rem] border border-zinc-800/50 hover:border-zinc-700 transition-all">
-                  <h4 className="text-orange-500 font-black uppercase italic text-xl mb-1">{e.title}</h4>
-                  <p className="text-[10px] font-bold uppercase mb-4 text-zinc-500">Bron: {e.forceName} | {new Date(e.timestamp).toLocaleDateString()}</p>
-                  <p className="text-zinc-300 text-sm italic border-l-2 border-zinc-800 pl-6 leading-relaxed whitespace-pre-wrap">{e.content}</p>
+                <article key={e.id} className="bg-zinc-900/40 p-8 rounded-[2rem] border border-zinc-800/50 hover:border-zinc-700 transition-all shadow-md">
+                  <h4 className="text-orange-500 font-black uppercase italic text-xl mb-1">{String(e.title || "Zonder Titel")}</h4>
+                  <p className={`text-[10px] font-bold uppercase mb-4 ${getFactionTextColor(e.superFaction)}`}>Bron: {String(e.forceName || "Onbekend")} | {new Date(e.timestamp).toLocaleDateString()}</p>
+                  <p className="text-zinc-300 text-sm italic border-l-2 border-zinc-800 pl-6 leading-relaxed whitespace-pre-wrap">{String(e.content || "")}</p>
                 </article>
               ))}
             </div>
@@ -546,21 +668,21 @@ export default function App() {
                <form onSubmit={handleLogBattle} className="bg-zinc-900 p-8 rounded-[2rem] border border-zinc-800 space-y-6 shadow-xl">
                  <h3 className="font-black uppercase text-xl text-orange-500 text-center flex items-center justify-center gap-3"><Swords size={24}/> Log Engagement</h3>
                  <div className="grid grid-cols-1 md:grid-cols-2 gap-4">
-                    <select className="bg-zinc-950 p-4 rounded-xl border border-zinc-800 text-zinc-300" value={battleForm.attackerId} onChange={e => setBattleForm({...battleForm, attackerId: e.target.value})} required>
+                    <select className="bg-zinc-950 p-4 rounded-xl border border-zinc-800 text-zinc-300 outline-none focus:border-orange-500" value={battleForm.attackerId} onChange={e => setBattleForm({...battleForm, attackerId: e.target.value})} required>
                        <option value="">Attacker...</option>
-                       {crusadeCards.map(c => <option key={c.id} value={c.id}>{c.forceName}</option>)}
+                       {crusadeCards.map(c => <option key={c.id} value={c.id}>{String(c.forceName)}</option>)}
                     </select>
-                    <select className="bg-zinc-950 p-4 rounded-xl border border-zinc-800 text-zinc-300" value={battleForm.defenderId} onChange={e => setBattleForm({...battleForm, defenderId: e.target.value})} required>
+                    <select className="bg-zinc-950 p-4 rounded-xl border border-zinc-800 text-zinc-300 outline-none focus:border-orange-500" value={battleForm.defenderId} onChange={e => setBattleForm({...battleForm, defenderId: e.target.value})} required>
                        <option value="">Defender...</option>
-                       {crusadeCards.map(c => <option key={c.id} value={c.id}>{c.forceName}</option>)}
+                       {crusadeCards.map(c => <option key={c.id} value={c.id}>{String(c.forceName)}</option>)}
                     </select>
                  </div>
-                 <select className="w-full bg-orange-950/20 p-4 rounded-xl border border-orange-500/50 text-white font-bold" value={battleForm.winnerId} onChange={e => setBattleForm({...battleForm, winnerId: e.target.value})} required>
+                 <select className="w-full bg-orange-950/20 p-4 rounded-xl border border-orange-500/50 text-white font-bold outline-none" value={battleForm.winnerId} onChange={e => setBattleForm({...battleForm, winnerId: e.target.value})} required>
                     <option value="">Select Winnaar...</option>
                     {battleForm.attackerId && <option value={battleForm.attackerId}>{crusadeCards.find(c => c.id === battleForm.attackerId)?.forceName}</option>}
                     {battleForm.defenderId && <option value={battleForm.defenderId}>{crusadeCards.find(c => c.id === battleForm.defenderId)?.forceName}</option>}
                  </select>
-                 <button disabled={isProcessing} className="w-full bg-orange-600 p-4 rounded-xl font-black uppercase shadow-lg">Confirm Battle result</button>
+                 <button disabled={isProcessing} className="w-full bg-orange-600 p-4 rounded-xl font-black uppercase shadow-lg hover:bg-orange-500 transition-all">Confirm Battle result</button>
                </form>
             )}
             <div className="bg-zinc-900 rounded-3xl border border-zinc-800 overflow-hidden shadow-2xl">
@@ -568,11 +690,11 @@ export default function App() {
                 <thead className="bg-zinc-950 text-zinc-600 font-black uppercase border-b border-zinc-800"><tr><th className="p-5">Slagveld</th><th className="p-5 text-orange-500">Victorious</th></tr></thead>
                 <tbody className="divide-y divide-zinc-800">
                   {battleLogs.map(l => (
-                    <tr key={l.id} className="hover:bg-zinc-800/30">
-                       <td className="p-5 font-bold text-zinc-300">{l.attacker} vs {l.defender}</td>
+                    <tr key={l.id} className="hover:bg-zinc-800/30 transition-colors">
+                       <td className="p-5 font-bold text-zinc-300">{String(l.attacker)} vs {String(l.defender)}</td>
                        <td className="p-5 font-black uppercase italic text-white flex items-center gap-2">
                           <span className={`w-2 h-2 rounded-full ${l.winnerSuperFaction === 'Imperium' ? 'bg-blue-500' : l.winnerSuperFaction === 'Chaos' ? 'bg-red-500' : 'bg-green-500'}`}></span>
-                          {l.winner}
+                          {String(l.winner)}
                        </td>
                     </tr>
                   ))}
@@ -589,12 +711,10 @@ export default function App() {
                 <div className="absolute top-0 left-0 w-1.5 h-full bg-orange-600"></div>
                 <h2 className="text-2xl font-black uppercase italic mb-3 tracking-tighter text-white">Hall of Heroes</h2>
                 <div className="grid grid-cols-1 md:grid-cols-2 gap-8 mt-8">
-                   
-                   {/* Veterans: Most Battles */}
-                   <div className="bg-zinc-950/50 rounded-3xl p-6 border border-zinc-800">
+                   <div className="bg-zinc-950/50 rounded-3xl p-6 border border-zinc-800 shadow-inner">
                       <h3 className="text-[10px] font-black uppercase tracking-widest text-zinc-500 mb-4 flex items-center gap-2"><History size={14}/> Veteranen (Veldslagen)</h3>
                       <div className="space-y-2">
-                         {Object.values(crusadeCards.reduce((acc, c) => { acc[c.forceName] = { name: c.forceName, count: 0, player: c.playerName }; return acc; }, {})).map(f => {
+                         {Object.values(crusadeCards.reduce((acc, c) => { acc[c.forceName] = { name: String(c.forceName), count: 0, player: String(c.playerName) }; return acc; }, {})).map(f => {
                             let count = 0; battleLogs.forEach(b => { if(b.attacker === f.name || b.defender === f.name) count++; }); return { ...f, count };
                          }).sort((a, b) => b.count - a.count).filter(f => f.count > 0).slice(0, 5).map((f, i) => (
                             <div key={i} className="flex justify-between items-center p-3 bg-zinc-900 rounded-xl border border-zinc-800/50">
@@ -604,12 +724,10 @@ export default function App() {
                          ))}
                       </div>
                    </div>
-
-                   {/* Winners: Most Zeges */}
-                   <div className="bg-zinc-950/50 rounded-3xl p-6 border border-zinc-800">
+                   <div className="bg-zinc-950/50 rounded-3xl p-6 border border-zinc-800 shadow-inner">
                       <h3 className="text-[10px] font-black uppercase tracking-widest text-zinc-500 mb-4 flex items-center gap-2"><Trophy size={14}/> Overwinnaars (Zeges)</h3>
                       <div className="space-y-2">
-                         {crusadeCards.map(c => ({ name: c.forceName, player: c.playerName, wins: battleLogs.filter(b => b.winner === c.forceName).length }))
+                         {crusadeCards.map(c => ({ name: String(c.forceName), player: String(c.playerName), wins: battleLogs.filter(b => b.winner === c.forceName).length }))
                             .sort((a, b) => b.wins - a.wins).filter(x => x.wins > 0).slice(0, 5).map((f, i) => (
                             <div key={i} className="flex justify-between items-center p-3 bg-zinc-900 rounded-xl border border-zinc-800/50">
                                <div><p className="text-xs font-bold uppercase text-white leading-none">{f.name}</p><p className="text-[8px] uppercase text-zinc-500">{f.player}</p></div>
@@ -618,38 +736,51 @@ export default function App() {
                          ))}
                       </div>
                    </div>
-
-                   {/* Elite: Highest XP */}
-                   <div className="bg-zinc-950/50 rounded-3xl p-6 border border-zinc-800">
+                   <div className="bg-zinc-950/50 rounded-3xl p-6 border border-zinc-800 shadow-inner">
                       <h3 className="text-[10px] font-black uppercase tracking-widest text-zinc-500 mb-4 flex items-center gap-2"><Zap size={14}/> Elite Helden (XP)</h3>
                       <div className="space-y-2">
-                         {crusadeCards.flatMap(c => (c.units || []).map(u => ({...u, force: c.forceName})))
-                            .sort((a, b) => (b.xp || 0) - (a.xp || 0)).filter(x => (x.xp || 0) > 0).slice(0, 5).map((u, i) => (
+                         {crusadeCards.flatMap(c => (c.units || []).map(u => ({...u, force: String(c.forceName)})))
+                            .sort((a, b) => (Number(b.xp) || 0) - (Number(a.xp) || 0)).filter(x => (Number(x.xp) || 0) > 0).slice(0, 5).map((u, i) => (
                             <div key={i} className="flex justify-between items-center p-3 bg-zinc-900 rounded-xl border border-zinc-800/50">
-                               <div><p className="text-xs font-bold uppercase text-white flex items-center gap-1">{u.name} {u.isWarlord && <Crown size={10} className="text-yellow-500"/>}</p><p className="text-[8px] uppercase text-zinc-500">{u.force}</p></div>
+                               <div><p className="text-xs font-bold uppercase text-white flex items-center gap-1">{String(u.name)} {u.isWarlord && <Crown size={10} className="text-yellow-500"/>}</p><p className="text-[8px] uppercase text-zinc-500">{u.force}</p></div>
                                <span className="text-sm font-black text-blue-400">{u.xp}</span>
                             </div>
                          ))}
                       </div>
                    </div>
-
-                   {/* Deadly: Kill Tally */}
-                   <div className="bg-zinc-950/50 rounded-3xl p-6 border border-zinc-800">
+                   <div className="bg-zinc-950/50 rounded-3xl p-6 border border-zinc-800 shadow-inner">
                       <h3 className="text-[10px] font-black uppercase tracking-widest text-zinc-500 mb-4 flex items-center gap-2"><Skull size={14}/> Dodelijke Units (Kills)</h3>
                       <div className="space-y-2">
-                         {crusadeCards.flatMap(c => (c.units || []).map(u => ({...u, force: c.forceName})))
-                            .sort((a, b) => (b.killTally || 0) - (a.killTally || 0)).filter(x => (x.killTally || 0) > 0).slice(0, 5).map((u, i) => (
+                         {crusadeCards.flatMap(c => (c.units || []).map(u => ({...u, force: String(c.forceName)})))
+                            .sort((a, b) => (Number(b.killTally) || 0) - (Number(a.killTally) || 0)).filter(x => (Number(x.killTally) || 0) > 0).slice(0, 5).map((u, i) => (
                             <div key={i} className="flex justify-between items-center p-3 bg-zinc-900 rounded-xl border border-zinc-800/50">
-                               <div><p className="text-xs font-bold uppercase text-white flex items-center gap-1">{u.name} {u.isWarlord && <Crown size={10} className="text-yellow-500"/>}</p><p className="text-[8px] uppercase text-zinc-500">{u.force}</p></div>
+                               <div><p className="text-xs font-bold uppercase text-white flex items-center gap-1">{String(u.name)} {u.isWarlord && <Crown size={10} className="text-yellow-500"/>}</p><p className="text-[8px] uppercase text-zinc-500">{u.force}</p></div>
                                <span className="text-sm font-black text-red-500">{u.killTally}</span>
                             </div>
                          ))}
                       </div>
                    </div>
-
                 </div>
               </div>
            </div>
+        )}
+
+        {/* REGELS */}
+        {activeTab === 'regels' && (
+          <section className="space-y-6 animate-in fade-in">
+            <div className="flex items-center gap-2 border-b border-zinc-800 pb-2">
+                <BookOpen size={24} className="text-orange-500" />
+                <h2 className="text-2xl font-black uppercase tracking-tight text-white italic">Crusade Protocol</h2>
+            </div>
+            <div className="grid grid-cols-1 md:grid-cols-2 gap-4">
+                {RULES_DATA.map((r, i) => (
+                  <div key={i} className="bg-zinc-900 p-6 rounded-2xl border-l-4 border-orange-600 shadow-xl hover:bg-zinc-800/40 transition-colors">
+                      <h3 className="font-black uppercase text-orange-500 mb-2 text-xs tracking-tight">{r.title}</h3>
+                      <p className="text-zinc-400 text-sm leading-relaxed italic">{r.content}</p>
+                  </div>
+                ))}
+            </div>
+          </section>
         )}
 
         {/* ADMIN VIEW */}
@@ -660,8 +791,8 @@ export default function App() {
                 <Lock size={40} className="mx-auto text-zinc-700 mb-4" />
                 <h3 className="text-2xl font-black uppercase mb-6">Master Access Required</h3>
                 <form onSubmit={handleAdminLogin} className="space-y-4">
-                  <input type="password" placeholder="Password" className="w-full bg-zinc-950 p-4 rounded-xl border border-zinc-800 text-center" value={adminInput} onChange={(e) => setAdminInput(e.target.value)} />
-                  <button className="w-full bg-red-900 p-4 rounded-xl font-black uppercase text-xs">Unlock Console</button>
+                  <input type="password" placeholder="Password" className="w-full bg-zinc-950 p-4 rounded-xl border border-zinc-800 text-center outline-none focus:border-red-500" value={adminInput} onChange={(e) => setAdminInput(e.target.value)} />
+                  <button className="w-full bg-red-900 p-4 rounded-xl font-black uppercase text-xs hover:bg-red-800 transition-all">Unlock Console</button>
                 </form>
               </div>
             ) : (
@@ -675,7 +806,7 @@ export default function App() {
                       <button disabled={isProcessing} onClick={handleGenerateAISummary} className="bg-orange-600 hover:bg-orange-500 p-4 rounded-xl font-black uppercase text-[10px] flex items-center gap-2 transition-all">
                         {isProcessing ? <Loader2 className="animate-spin" size={14}/> : <Sparkles size={14}/>} Update AI Chronicles
                       </button>
-                      <button onClick={() => setIsAdminAuthenticated(false)} className="text-[10px] font-black uppercase bg-zinc-800 px-4 py-2 rounded-xl">Lock Console</button>
+                      <button onClick={() => setIsAdminAuthenticated(false)} className="text-[10px] font-black uppercase bg-zinc-800 px-4 py-2 rounded-xl hover:bg-zinc-700">Lock Console</button>
                    </div>
                 </div>
 
@@ -684,8 +815,8 @@ export default function App() {
                       <h3 className="font-black uppercase text-zinc-500 mb-4 flex items-center gap-2 text-xs"><Users size={16}/> Manage Forces</h3>
                       <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 gap-4">
                         {crusadeCards.map(c => (
-                           <div key={c.id} className="bg-zinc-950 p-4 rounded-2xl flex justify-between items-center border border-zinc-800">
-                              <div><p className="font-black text-xs uppercase">{c.forceName}</p><p className="text-[8px] text-zinc-600">{c.playerName}</p></div>
+                           <div key={c.id} className="bg-zinc-950 p-4 rounded-2xl flex justify-between items-center border border-zinc-800 hover:border-red-900/50 transition-colors">
+                              <div><p className="font-black text-xs uppercase">{String(c.forceName)}</p><p className="text-[8px] text-zinc-600">{String(c.playerName)}</p></div>
                               <button onClick={() => deleteDocument('cards', c.id)} className="p-2 bg-red-900/10 text-red-600 rounded-lg hover:bg-red-600 hover:text-white transition-all"><Trash2 size={14}/></button>
                            </div>
                         ))}
@@ -696,8 +827,8 @@ export default function App() {
                       <h3 className="font-black uppercase text-zinc-500 mb-4 flex items-center gap-2 text-xs"><Swords size={16}/> Manage Battles</h3>
                       <div className="space-y-2">
                         {battleLogs.map(b => (
-                           <div key={b.id} className="bg-zinc-950 p-3 rounded-xl flex justify-between items-center border border-zinc-800">
-                              <p className="text-[10px] font-bold uppercase">{b.attacker} vs {b.defender} (Win: {b.winner})</p>
+                           <div key={b.id} className="bg-zinc-950 p-3 rounded-xl flex justify-between items-center border border-zinc-800 hover:border-red-900/30 transition-all">
+                              <p className="text-[10px] font-bold uppercase">{String(b.attacker)} vs {String(b.defender)} (Win: {String(b.winner)})</p>
                               <button onClick={() => deleteDocument('battles', b.id)} className="p-2 text-red-600 hover:bg-red-900/20 rounded-lg transition-all"><Trash2 size={12}/></button>
                            </div>
                         ))}
@@ -708,8 +839,8 @@ export default function App() {
                       <h3 className="font-black uppercase text-zinc-500 mb-4 flex items-center gap-2 text-xs"><ScrollText size={16}/> Manage Lore</h3>
                       <div className="space-y-2">
                         {loreEntries.map(e => (
-                           <div key={e.id} className="bg-zinc-950 p-3 rounded-xl flex justify-between items-center border border-zinc-800">
-                              <p className="text-[10px] font-bold uppercase">{e.title} <span className="opacity-30">by {e.forceName}</span></p>
+                           <div key={e.id} className="bg-zinc-950 p-3 rounded-xl flex justify-between items-center border border-zinc-800 hover:border-orange-500/20 transition-all">
+                              <p className="text-[10px] font-bold uppercase">{String(e.title)} <span className="opacity-30">by {String(e.forceName)}</span></p>
                               <div className="flex gap-2">
                                  <button onClick={() => setEditingLore(e)} className="p-2 text-orange-500 hover:bg-orange-900/20 rounded-lg"><Edit3 size={12}/></button>
                                  <button onClick={() => deleteDocument('lore', e.id)} className="p-2 text-red-600 hover:bg-red-900/20 rounded-lg transition-all"><Trash2 size={12}/></button>
@@ -733,13 +864,13 @@ export default function App() {
     {/* MODAL EDIT LORE */}
     {editingLore && (
       <div className="fixed inset-0 z-[200] bg-black/90 flex items-center justify-center p-6 backdrop-blur-sm">
-        <div className="bg-zinc-900 border-2 border-orange-900/50 p-8 rounded-[2rem] w-full max-w-2xl space-y-6 shadow-2xl">
+        <div className="bg-zinc-900 border-2 border-orange-900/50 p-8 rounded-[2rem] w-full max-w-2xl space-y-6 shadow-2xl animate-in zoom-in-95">
           <h3 className="text-xl font-black uppercase text-orange-500">Edit Sacred Text</h3>
-          <input className="w-full bg-zinc-950 p-4 rounded-xl border border-zinc-800" value={editingLore.title} onChange={e => setEditingLore({...editingLore, title: e.target.value})} />
-          <textarea className="w-full bg-zinc-950 p-4 rounded-xl border border-zinc-800 h-64" value={editingLore.content} onChange={e => setEditingLore({...editingLore, content: e.target.value})} />
+          <input className="w-full bg-zinc-950 p-4 rounded-xl border border-zinc-800 text-sm outline-none focus:border-orange-500" value={editingLore.title} onChange={e => setEditingLore({...editingLore, title: e.target.value})} />
+          <textarea className="w-full bg-zinc-950 p-4 rounded-xl border border-zinc-800 h-64 text-sm outline-none focus:border-orange-500" value={editingLore.content} onChange={e => setEditingLore({...editingLore, content: e.target.value})} />
           <div className="flex gap-4">
-            <button onClick={async () => { await updateDoc(doc(db, 'artifacts', appId, 'public', 'data', 'lore', editingLore.id), { title: editingLore.title, content: editingLore.content }); setEditingLore(null); showStatus("Archief bijgewerkt."); }} className="flex-1 bg-green-600 p-4 rounded-xl font-black uppercase">Opslaan</button>
-            <button onClick={() => setEditingLore(null)} className="flex-1 bg-zinc-800 p-4 rounded-xl font-black uppercase">Annuleren</button>
+            <button onClick={async () => { await updateDoc(doc(db, 'artifacts', appId, 'public', 'data', 'lore', editingLore.id), { title: editingLore.title, content: editingLore.content }); setEditingLore(null); showStatus("Archief bijgewerkt."); }} className="flex-1 bg-green-600 p-4 rounded-xl font-black uppercase transition-all hover:bg-green-500">Opslaan</button>
+            <button onClick={() => setEditingLore(null)} className="flex-1 bg-zinc-800 p-4 rounded-xl font-black uppercase transition-all hover:bg-zinc-700">Annuleren</button>
           </div>
         </div>
       </div>
@@ -753,10 +884,32 @@ function UnitField({ label, value, onChange, type = 'text', area = false }) {
     <div className="space-y-1">
       <label className="text-[8px] font-black uppercase text-zinc-600 tracking-widest ml-1">{label}</label>
       {area ? (
-        <textarea className="w-full bg-zinc-900 border border-zinc-800 p-3 rounded-xl text-[10px] text-zinc-300 outline-none focus:border-orange-500 transition-all shadow-inner" value={value || ''} onChange={e => onChange(e.target.value)} />
+        <textarea className="w-full bg-zinc-900 border border-zinc-800 p-3 rounded-xl text-[10px] text-zinc-300 outline-none focus:border-orange-500 transition-all shadow-inner h-24" value={value || ''} onChange={e => onChange(e.target.value)} />
       ) : (
         <input type={type} className="w-full bg-zinc-900 border border-zinc-800 p-3 rounded-xl text-[10px] text-zinc-300 outline-none focus:border-orange-500 transition-all shadow-inner" value={value || ''} onChange={e => onChange(e.target.value)} />
       )}
     </div>
+  );
+}
+
+function DonutChart({ data, size = 100, holeColor = '#09090b' }) {
+  const total = data.reduce((sum, d) => sum + d.value, 0);
+  if (total === 0) return <div className="text-zinc-800 text-[10px] uppercase font-black">Geen Data</div>;
+  let cumulative = 0;
+  return (
+    <svg viewBox="-1 -1 2 2" style={{ width: size, height: size, transform: 'rotate(-90deg)' }}>
+      {data.map(slice => {
+        const start = cumulative;
+        const end = cumulative + (slice.value / total);
+        cumulative = end;
+        const x1 = Math.cos(2 * Math.PI * start);
+        const y1 = Math.sin(2 * Math.PI * start);
+        const x2 = Math.cos(2 * Math.PI * end);
+        const y2 = Math.sin(2 * Math.PI * end);
+        const flag = (slice.value / total) > 0.5 ? 1 : 0;
+        return <path key={slice.label} d={`M ${x1} ${y1} A 1 1 0 ${flag} 1 ${x2} ${y2} L 0 0`} fill={slice.color} />;
+      })}
+      <circle cx="0" cy="0" r="0.65" fill={holeColor} />
+    </svg>
   );
 }
