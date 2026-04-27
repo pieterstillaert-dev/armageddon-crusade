@@ -74,7 +74,6 @@ const app = initializeApp(firebaseConfig);
 const auth = getAuth(app);
 const db = getFirestore(app);
 const appId = typeof __app_id !== 'undefined' ? __app_id : 'armageddon-crusade-companion';
-const apiKey = ""; // Gemini API key
 
 // --- ADMIN SETTINGS ---
 const ADMIN_PASSWORD = "admin123"; 
@@ -117,7 +116,7 @@ export default function App() {
   const [battleLogs, setBattleLogs] = useState([]);
   const [crusadeCards, setCrusadeCards] = useState([]);
   const [cardLogs, setCardLogs] = useState([]);
-  const [campaignState, setCampaignState] = useState({ aiSummary: "De archieven worden gescand door de Scribes...", lastUpdated: null });
+  const [campaignState, setCampaignState] = useState({ aiSummary: "De archieven worden geüpdatet door de Master of Archives...", lastUpdated: null });
   
   // UI States
   const [rolledMission, setRolledMission] = useState(null);
@@ -127,6 +126,7 @@ export default function App() {
   const [statusMsg, setStatusMsg] = useState({ text: '', type: '' });
   const [isAdminAuthenticated, setIsAdminAuthenticated] = useState(false);
   const [adminInput, setAdminInput] = useState("");
+  const [adminChronicleText, setAdminChronicleText] = useState("");
   const [isClaiming, setIsClaiming] = useState(false);
 
   // Form States
@@ -174,8 +174,12 @@ export default function App() {
     });
 
     const campaignRef = doc(db, 'artifacts', appId, 'public', 'data', 'state', 'campaign');
-    const unsubState = onSnapshot(campaignRef, (doc) => {
-      if (doc.exists()) setCampaignState(doc.data());
+    const unsubState = onSnapshot(campaignRef, (docSnap) => {
+      if (docSnap.exists()) {
+        const data = docSnap.data();
+        setCampaignState(data);
+        setAdminChronicleText(data.aiSummary || "");
+      }
     });
 
     return () => { unsubs.forEach(un => un()); unsubState(); };
@@ -186,39 +190,21 @@ export default function App() {
     setTimeout(() => setStatusMsg({ text: '', type: '' }), 5000);
   };
 
-  // --- AI LOGIC ---
-  const callGeminiWithRetry = async (prompt, retries = 5, delay = 1000) => {
-    for (let i = 0; i < retries; i++) {
-      try {
-        const response = await fetch(`https://generativelanguage.googleapis.com/v1beta/models/gemini-2.5-flash-preview-09-2025:generateContent?key=${apiKey}`, {
-          method: 'POST',
-          headers: { 'Content-Type': 'application/json' },
-          body: JSON.stringify({
-            contents: [{ parts: [{ text: prompt }] }],
-            systemInstruction: { parts: [{ text: "Je bent een keizerlijke scribe van de Administratum. Schrijf een sfeervol verslag van de Armageddon Crusade in het Nederlands. Gebruik 40k termen. Houd het onder de 250 woorden." }] }
-          })
-        });
-        const result = await response.json();
-        return result.candidates?.[0]?.content?.parts?.[0]?.text;
-      } catch (err) {
-        if (i === retries - 1) throw err;
-        await new Promise(res => setTimeout(res, delay * Math.pow(2, i)));
-      }
-    }
-  };
-
-  const handleGenerateAISummary = async () => {
+  // --- MANUAL CHRONICLES LOGIC (Admin) ---
+  const handleUpdateChronicles = async (e) => {
+    e.preventDefault();
     setIsProcessing(true);
-    showStatus("De Scribes raadplegen de data-taps...");
     try {
-      const recentBattles = battleLogs.slice(0, 10).map(b => `${b.attacker} vs ${b.defender} (Win: ${b.winner})`).join(', ');
-      const recentLore = loreEntries.slice(0, 5).map(l => `${l.title}: ${String(l.content).substring(0, 100)}...`).join(' | ');
-      const prompt = `Update van de oorlog. Legers: ${crusadeCards.map(c => c.forceName).join(', ')}. Gevechten: ${recentBattles}. Belangrijke lore: ${recentLore}. Wat is de status?`;
-      const aiText = await callGeminiWithRetry(prompt);
-      await setDoc(doc(db, 'artifacts', appId, 'public', 'data', 'state', 'campaign'), { aiSummary: String(aiText), lastUpdated: Date.now() });
-      showStatus("Chronicles bijgewerkt!");
-    } catch (err) { showStatus("AI Vox-storing.", "error"); }
-    finally { setIsProcessing(false); }
+      await setDoc(doc(db, 'artifacts', appId, 'public', 'data', 'state', 'campaign'), { 
+        aiSummary: String(adminChronicleText), 
+        lastUpdated: Date.now() 
+      });
+      showStatus("Chronicles succesvol bijgewerkt!");
+    } catch (err) { 
+      showStatus("Fout bij opslaan Chronicles.", "error"); 
+    } finally { 
+      setIsProcessing(false); 
+    }
   };
 
   // --- DATABASE ACTIONS ---
@@ -619,7 +605,7 @@ export default function App() {
               </div>
             )}
 
-            {/* --- NIEUW: ANDERE SPELERS (READ ONLY) --- */}
+            {/* --- ANDERE SPELERS (READ ONLY) --- */}
             {crusadeCards.filter(c => c.id !== myCard?.id).length > 0 && (
               <div className="mt-12 space-y-6 animate-in fade-in border-t border-zinc-800/50 pt-8">
                  <div className="flex items-center gap-2 mb-6">
@@ -883,14 +869,28 @@ export default function App() {
                       <h2 className="text-xl font-black uppercase tracking-widest text-red-500 italic">Campaign Commander Console</h2>
                    </div>
                    <div className="flex gap-2">
-                      <button disabled={isProcessing} onClick={handleGenerateAISummary} className="bg-orange-600 hover:bg-orange-500 p-4 rounded-xl font-black uppercase text-[10px] flex items-center gap-2 transition-all">
-                        {isProcessing ? <Loader2 className="animate-spin" size={14}/> : <Sparkles size={14}/>} Update AI Chronicles
-                      </button>
                       <button onClick={() => setIsAdminAuthenticated(false)} className="text-[10px] font-black uppercase bg-zinc-800 px-4 py-2 rounded-xl hover:bg-zinc-700">Lock Console</button>
                    </div>
                 </div>
 
                 <div className="grid grid-cols-1 gap-8">
+                   {/* NIEUW: MANUAL CHRONICLES EDITOR */}
+                   <div className="bg-zinc-900 p-6 rounded-3xl border border-zinc-800">
+                      <h3 className="font-black uppercase text-zinc-500 mb-4 flex items-center gap-2 text-xs"><FileText size={16}/> Edit Chronicles of the Scribe</h3>
+                      <form onSubmit={handleUpdateChronicles} className="space-y-4">
+                         <textarea
+                            className="w-full bg-zinc-950 p-4 rounded-xl border border-zinc-800 text-sm outline-none focus:border-orange-500 h-40"
+                            value={adminChronicleText}
+                            onChange={(e) => setAdminChronicleText(e.target.value)}
+                            placeholder="Schrijf hier de handmatige update voor het dashboard..."
+                            required
+                         />
+                         <button disabled={isProcessing} className="w-full bg-orange-600 hover:bg-orange-500 p-4 rounded-xl font-black uppercase text-xs transition-all flex justify-center items-center gap-2">
+                            {isProcessing ? <Loader2 className="animate-spin" size={14}/> : <Sparkles size={14}/>} Publish Chronicles Update
+                         </button>
+                      </form>
+                   </div>
+
                    <div className="bg-zinc-900 p-6 rounded-3xl border border-zinc-800">
                       <h3 className="font-black uppercase text-zinc-500 mb-4 flex items-center gap-2 text-xs"><Users size={16}/> Manage Forces</h3>
                       <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 gap-4">
@@ -937,7 +937,7 @@ export default function App() {
       </main>
 
       <footer className="fixed bottom-0 w-full bg-zinc-950/95 border-t border-zinc-800 p-4 text-center z-50 print:hidden backdrop-blur-md">
-        <p className="text-[7px] text-zinc-700 font-mono tracking-[0.4em] uppercase italic">Purity of Purpose // AI Scribe Active // The Emperor Protects</p>
+        <p className="text-[7px] text-zinc-700 font-mono tracking-[0.4em] uppercase italic">Purity of Purpose // Imperial Scribe Active // The Emperor Protects</p>
       </footer>
     </div>
 
