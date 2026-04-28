@@ -54,7 +54,8 @@ import {
   Lock,
   Unlock,
   Sparkles,
-  FileText
+  FileText,
+  Crosshair
 } from 'lucide-react';
 
 // --- CONFIGURATIE ---
@@ -239,7 +240,8 @@ export default function App() {
     if (!newUnitName.trim()) return;
     const newUnit = { 
       id: Date.now().toString(), name: newUnitName.trim(), xp: 0, modelCount: 1, points: 0, killTally: 0, 
-      isWarlord: false, unitType: 'Other', traits: '', mods: '', scars: '', relics: '', enhancements: '', customInfo: '' 
+      isWarlord: false, unitType: 'Other', traits: '', mods: '', scars: '', relics: '', enhancements: '', customInfo: '',
+      nemesisId: '', nemesisName: '', nemesisForce: '', nemesisReason: ''
     };
     await handleUpdateCard(card.id, { units: [...(card.units || []), newUnit] }, `Unit toegevoegd: ${newUnitName}`);
     setNewUnitName('');
@@ -248,6 +250,26 @@ export default function App() {
 
   const handleUpdateUnit = async (card, unitId, field, value) => {
     const updatedUnits = card.units.map(u => u.id === unitId ? { ...u, [field]: value } : u);
+    await updateDoc(doc(db, 'artifacts', appId, 'public', 'data', 'cards', card.id), { units: updatedUnits });
+  };
+
+  const handleUpdateNemesis = async (card, unitId, targetNemesisId) => {
+    let nName = '';
+    let nForce = '';
+    if (targetNemesisId) {
+      crusadeCards.forEach(c => {
+        const found = c.units?.find(u => u.id === targetNemesisId);
+        if (found) { nName = found.name; nForce = c.forceName; }
+      });
+      if (!nName) {
+        const currentUnit = card.units.find(u => u.id === unitId);
+        if (currentUnit && currentUnit.nemesisId === targetNemesisId) {
+          nName = currentUnit.nemesisName;
+          nForce = currentUnit.nemesisForce;
+        }
+      }
+    }
+    const updatedUnits = card.units.map(u => u.id === unitId ? { ...u, nemesisId: targetNemesisId, nemesisName: nName, nemesisForce: nForce } : u);
     await updateDoc(doc(db, 'artifacts', appId, 'public', 'data', 'cards', card.id), { units: updatedUnits });
   };
 
@@ -335,6 +357,22 @@ export default function App() {
     { label: 'Chaos', value: battleLogs.filter(b => b.winnerSuperFaction === 'Chaos').length, color: factionColors['Chaos'] },
     { label: 'Xenos', value: battleLogs.filter(b => b.winnerSuperFaction === 'Xenos').length, color: factionColors['Xenos'] }
   ];
+
+  // --- NIEUW: Nemesis Helper & Leaderboard Variabelen ---
+  const otherForcesUnits = myCard ? crusadeCards.filter(c => c.id !== myCard.id).flatMap(c => (c.units || []).map(u => ({ id: u.id, name: u.name, force: c.forceName }))) : [];
+
+  const nemesisCounts = {};
+  crusadeCards.forEach(c => {
+     (c.units || []).forEach(u => {
+        if (u.nemesisId) {
+            if(!nemesisCounts[u.nemesisId]) {
+                nemesisCounts[u.nemesisId] = { id: u.nemesisId, name: u.nemesisName, force: u.nemesisForce, count: 0 };
+            }
+            nemesisCounts[u.nemesisId].count++;
+        }
+     });
+  });
+  const hatedList = Object.values(nemesisCounts).sort((a,b) => b.count - a.count).slice(0, 5);
 
   if (!user) return <div className="min-h-screen bg-zinc-950 flex flex-col items-center justify-center text-orange-500 font-mono italic"><Skull size={40} className="animate-pulse mb-4" /> INITIALISEREN...</div>;
 
@@ -482,32 +520,30 @@ export default function App() {
                 <Skull className="mx-auto mb-4 text-zinc-700" size={40}/>
                 {!isClaiming ? (
                   <>
+                    <h3 className="font-black uppercase text-xl text-orange-500 mb-6">Inloggen</h3>
+                    <form onSubmit={handleClaimForce} className="space-y-4 max-w-sm mx-auto text-left">
+                       <input type="text" placeholder="Exacte Force Naam" className="w-full bg-zinc-950 p-4 rounded-xl border border-zinc-800 text-sm outline-none focus:border-orange-500" onChange={e => setClaimForm({...claimForm, forceName: e.target.value})} required />
+                       <input type="password" placeholder="Paswoord" className="w-full bg-zinc-950 p-4 rounded-xl border border-zinc-800 text-sm outline-none focus:border-orange-500" onChange={e => setClaimForm({...claimForm, secretKey: e.target.value})} required />
+                       <button className="w-full bg-zinc-100 text-zinc-950 p-4 rounded-xl font-bold text-xs uppercase hover:bg-white transition-all">Login</button>
+                    </form>
+                    <button onClick={() => setIsClaiming(true)} className="mt-8 text-zinc-500 text-[10px] uppercase font-black hover:text-white transition-all">Nieuw leger registreren?</button>
+                  </>
+                ) : (
+                  <>
                     <h3 className="font-black uppercase text-xl text-orange-500 mb-6">Registreer je Crusade Force</h3>
                     <form onSubmit={handleCreateCard} className="grid grid-cols-1 md:grid-cols-2 gap-4 text-left">
                       <input type="text" placeholder="Force Naam" className="bg-zinc-950 p-4 rounded-xl border border-zinc-800 outline-none focus:border-orange-500" onChange={e => setCardForm({...cardForm, forceName: e.target.value})} required />
                       <input type="text" placeholder="Faction" className="bg-zinc-950 p-4 rounded-xl border border-zinc-800 outline-none focus:border-orange-500" onChange={e => setCardForm({...cardForm, faction: e.target.value})} required />
-                      <select className="bg-zinc-950 p-4 rounded-xl border border-zinc-800 text-zinc-300 outline-none" value={cardForm.superFaction} onChange={e => setCardForm({...cardForm, superFaction: e.target.value})}>
+                      <select className="bg-zinc-950 p-4 rounded-xl border border-zinc-800 text-zinc-300 outline-none focus:border-orange-500" value={cardForm.superFaction} onChange={e => setCardForm({...cardForm, superFaction: e.target.value})}>
                         <option value="Imperium">Imperium</option>
                         <option value="Chaos">Chaos</option>
                         <option value="Xenos">Xenos</option>
                       </select>
                       <input type="text" placeholder="Naam Commandeur" className="bg-zinc-950 p-4 rounded-xl border border-zinc-800 outline-none focus:border-orange-500" onChange={e => setCardForm({...cardForm, playerName: e.target.value})} required />
-                      <input type="password" placeholder="Toegangscode" className="md:col-span-2 bg-zinc-950 p-4 rounded-xl border border-zinc-800 outline-none focus:border-orange-500" onChange={e => setCardForm({...cardForm, secretKey: e.target.value})} required />
-                      <button className="md:col-span-2 bg-orange-600 p-4 rounded-xl font-black uppercase text-xs hover:bg-orange-500">Start Crusade</button>
+                      <input type="password" placeholder="Paswoord" className="md:col-span-2 bg-zinc-950 p-4 rounded-xl border border-zinc-800 outline-none focus:border-orange-500" onChange={e => setCardForm({...cardForm, secretKey: e.target.value})} required />
+                      <button className="md:col-span-2 bg-orange-600 p-4 rounded-xl font-black uppercase text-xs hover:bg-orange-500 transition-all">Start Crusade</button>
                     </form>
-                    <button onClick={() => setIsClaiming(true)} className="mt-8 text-zinc-500 text-[10px] uppercase font-black hover:text-white">Heb je al een leger? Herstel toegang</button>
-                  </>
-                ) : (
-                  <>
-                    <h3 className="font-black uppercase text-xl text-orange-500 mb-6">Herstel Toegang</h3>
-                    <form onSubmit={handleClaimForce} className="space-y-4 max-w-sm mx-auto text-left">
-                       <input type="text" placeholder="Exacte Force Naam" className="w-full bg-zinc-950 p-4 rounded-xl border border-zinc-800 text-sm outline-none" onChange={e => setClaimForm({...claimForm, forceName: e.target.value})} required />
-                       <input type="password" placeholder="Jouw Code" className="w-full bg-zinc-950 p-4 rounded-xl border border-zinc-800 text-sm outline-none" onChange={e => setClaimForm({...claimForm, secretKey: e.target.value})} required />
-                       <div className="flex gap-2">
-                          <button className="flex-1 bg-zinc-100 text-zinc-950 p-4 rounded-xl font-bold text-xs uppercase">Herstel</button>
-                          <button type="button" onClick={() => setIsClaiming(false)} className="flex-1 bg-zinc-800 p-4 rounded-xl font-bold text-xs uppercase">Terug</button>
-                       </div>
-                    </form>
+                    <button onClick={() => setIsClaiming(false)} className="mt-8 text-zinc-500 text-[10px] uppercase font-black hover:text-white transition-all">Heb je al een leger? Inloggen</button>
                   </>
                 )}
               </div>
@@ -596,6 +632,29 @@ export default function App() {
                                <UnitField label="Enhancements" value={unit.enhancements} onChange={v => handleUpdateUnit(myCard, unit.id, 'enhancements', v)} />
                                <UnitField label="Lore / Campaign Records" area value={unit.customInfo} onChange={v => handleUpdateUnit(myCard, unit.id, 'customInfo', v)} />
                             </div>
+
+                            {/* NIEUW: Nemesis Sectie */}
+                            <div className="md:col-span-2 pt-4 border-t border-zinc-800/50 mt-2">
+                               <h4 className="text-[10px] font-black uppercase tracking-widest text-zinc-500 mb-4">Rivaliteit & Nemesis</h4>
+                               <div className="grid grid-cols-1 md:grid-cols-2 gap-4">
+                                  <div className="space-y-1">
+                                     <label className="text-[8px] font-black uppercase text-zinc-600 tracking-widest ml-1">Kies Nemesis (Andere legers)</label>
+                                     <select
+                                        className="w-full bg-zinc-900 border border-zinc-800 p-3 rounded-xl text-[10px] text-zinc-300 outline-none focus:border-orange-500 transition-all shadow-inner"
+                                        value={unit.nemesisId || ''}
+                                        onChange={e => handleUpdateNemesis(myCard, unit.id, e.target.value)}
+                                     >
+                                        <option value="">-- Geen Nemesis --</option>
+                                        {otherForcesUnits.map(ou => <option key={ou.id} value={ou.id}>{String(ou.force)} - {String(ou.name)}</option>)}
+                                        {unit.nemesisId && !otherForcesUnits.find(ou => ou.id === unit.nemesisId) && (
+                                           <option value={unit.nemesisId}>{String(unit.nemesisForce)} - {String(unit.nemesisName)} (Legacy)</option>
+                                        )}
+                                     </select>
+                                  </div>
+                                  <UnitField label="Achtergrond / Reden voor Rivaliteit" area value={unit.nemesisReason} onChange={v => handleUpdateUnit(myCard, unit.id, 'nemesisReason', v)} />
+                               </div>
+                            </div>
+
                           </div>
                         )}
                       </div>
@@ -666,6 +725,17 @@ export default function App() {
                                                <ReadOnlyField label="Relics" value={unit.relics} />
                                                <ReadOnlyField label="Enhancements" value={unit.enhancements} />
                                                <ReadOnlyField label="Lore / Campaign Records" value={unit.customInfo} />
+                                            </div>
+                                            <div className="md:col-span-2 pt-4 border-t border-zinc-800/50 mt-2">
+                                               <h4 className="text-[10px] font-black uppercase tracking-widest text-zinc-500 mb-4">Rivaliteit & Nemesis</h4>
+                                               <div className="grid grid-cols-1 md:grid-cols-2 gap-4">
+                                                  <ReadOnlyField label="Gekozen Nemesis" value={
+                                                     unit.nemesisId 
+                                                     ? `${String(unit.nemesisForce)} - ${String(unit.nemesisName)} ${!crusadeCards.some(c => c.units?.some(ex => ex.id === unit.nemesisId)) ? '(Legacy)' : ''}` 
+                                                     : '-'
+                                                  } />
+                                                  <ReadOnlyField label="Achtergrond / Reden" value={unit.nemesisReason} />
+                                               </div>
                                             </div>
                                          </div>
                                       )}
@@ -826,6 +896,27 @@ export default function App() {
                          ))}
                       </div>
                    </div>
+
+                   {/* NIEUW: Meest Gehate Unit */}
+                   <div className="bg-zinc-950/50 rounded-3xl p-6 border border-zinc-800 shadow-inner md:col-span-2">
+                      <h3 className="text-[10px] font-black uppercase tracking-widest text-zinc-500 mb-4 flex items-center gap-2"><Crosshair size={14}/> Meest Gehate Units (Nemesis Tracker)</h3>
+                      <div className="grid grid-cols-1 md:grid-cols-2 gap-4">
+                         {hatedList.map((u, i) => {
+                            const stillExists = crusadeCards.some(c => c.units?.some(ex => ex.id === u.id));
+                            return (
+                               <div key={i} className="flex justify-between items-center p-3 bg-zinc-900 rounded-xl border border-zinc-800/50 transition-all hover:border-zinc-700">
+                                  <div>
+                                     <p className="text-xs font-bold uppercase text-white leading-none">{String(u.name)} {!stillExists && <span className="text-[8px] text-red-500 ml-1">(Legacy)</span>}</p>
+                                     <p className="text-[8px] uppercase text-zinc-500">{String(u.force)}</p>
+                                  </div>
+                                  <span className="text-sm font-black text-red-500">{u.count}x Nemesis</span>
+                               </div>
+                            );
+                         })}
+                         {hatedList.length === 0 && <p className="text-[10px] text-zinc-600 italic">Nog geen rivaliteiten geregistreerd.</p>}
+                      </div>
+                   </div>
+
                 </div>
               </div>
            </div>
