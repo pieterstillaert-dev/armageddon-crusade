@@ -55,7 +55,8 @@ import {
   Unlock,
   Sparkles,
   FileText,
-  Crosshair
+  Crosshair,
+  Key
 } from 'lucide-react';
 
 // --- CONFIGURATIE ---
@@ -128,14 +129,15 @@ export default function App() {
   const [isAdminAuthenticated, setIsAdminAuthenticated] = useState(false);
   const [adminInput, setAdminInput] = useState("");
   const [adminChronicleText, setAdminChronicleText] = useState("");
-  const [isClaiming, setIsClaiming] = useState(false);
+  const [isClaiming, setIsClaiming] = useState(false); // Let op: false betekent we tonen 'Inloggen' eerst
 
   // Form States
   const [newLore, setNewLore] = useState({ title: '', content: '', linkedBattleId: '' });
   const [battleForm, setBattleForm] = useState({ attackerId: '', defenderId: '', winnerId: '', writeLoreNow: false, loreTitle: '', loreContent: '' });
   const [cardForm, setCardForm] = useState({ forceName: '', faction: '', superFaction: 'Imperium', playerName: '', supply: 500, rp: 0, crusadePoints: 0, secretKey: '' });
-  const [claimForm, setClaimForm] = useState({ forceName: '', secretKey: '' });
+  const [claimForm, setClaimForm] = useState({ loginName: '', secretKey: '' });
   const [newUnitName, setNewUnitName] = useState('');
+  const [newPassword, setNewPassword] = useState('');
   const [editingLore, setEditingLore] = useState(null);
 
   // States voor het bekijken van andere legers (Read-only)
@@ -228,12 +230,14 @@ export default function App() {
 
   const handleClaimForce = async (e) => {
     e.preventDefault();
-    const target = crusadeCards.find(c => String(c.forceName).toLowerCase() === claimForm.forceName.toLowerCase() && c.secretKey === claimForm.secretKey);
+    setIsProcessing(true);
+    const inputLogin = (claimForm.loginName || '').toLowerCase().trim();
+    const target = crusadeCards.find(c => String(c.playerName || '').toLowerCase().trim() === inputLogin && c.secretKey === claimForm.secretKey);
     if (target) {
       await updateDoc(doc(db, 'artifacts', appId, 'public', 'data', 'cards', target.id), { owner: user.uid });
       showStatus("Beheer hersteld!");
-      setIsClaiming(false);
-    } else { showStatus("Gegevens onjuist.", "error"); }
+    } else { showStatus("Spelersnaam of paswoord onjuist.", "error"); }
+    setIsProcessing(false);
   };
 
   const handleCreateUnit = async (card) => {
@@ -358,7 +362,7 @@ export default function App() {
     { label: 'Xenos', value: battleLogs.filter(b => b.winnerSuperFaction === 'Xenos').length, color: factionColors['Xenos'] }
   ];
 
-  // --- NIEUW: Nemesis Helper & Leaderboard Variabelen ---
+  // --- Nemesis Helper & Leaderboard Variabelen ---
   const otherForcesUnits = myCard ? crusadeCards.filter(c => c.id !== myCard.id).flatMap(c => (c.units || []).map(u => ({ id: u.id, name: u.name, force: c.forceName }))) : [];
 
   const nemesisCounts = {};
@@ -522,9 +526,11 @@ export default function App() {
                   <>
                     <h3 className="font-black uppercase text-xl text-orange-500 mb-6">Inloggen</h3>
                     <form onSubmit={handleClaimForce} className="space-y-4 max-w-sm mx-auto text-left">
-                       <input type="text" placeholder="Exacte Force Naam" className="w-full bg-zinc-950 p-4 rounded-xl border border-zinc-800 text-sm outline-none focus:border-orange-500" onChange={e => setClaimForm({...claimForm, forceName: e.target.value})} required />
+                       <input type="text" placeholder="Spelersnaam (Commandeur)" className="w-full bg-zinc-950 p-4 rounded-xl border border-zinc-800 text-sm outline-none focus:border-orange-500" onChange={e => setClaimForm({...claimForm, loginName: e.target.value})} required />
                        <input type="password" placeholder="Paswoord" className="w-full bg-zinc-950 p-4 rounded-xl border border-zinc-800 text-sm outline-none focus:border-orange-500" onChange={e => setClaimForm({...claimForm, secretKey: e.target.value})} required />
-                       <button className="w-full bg-zinc-100 text-zinc-950 p-4 rounded-xl font-bold text-xs uppercase hover:bg-white transition-all">Login</button>
+                       <div className="flex gap-2">
+                          <button disabled={isProcessing} className="flex-1 bg-zinc-100 text-zinc-950 p-4 rounded-xl font-bold text-xs uppercase hover:bg-white transition-all">Login</button>
+                       </div>
                     </form>
                     <button onClick={() => setIsClaiming(true)} className="mt-8 text-zinc-500 text-[10px] uppercase font-black hover:text-white transition-all">Nieuw leger registreren?</button>
                   </>
@@ -750,6 +756,34 @@ export default function App() {
                  ))}
               </div>
             )}
+
+            {/* --- ACCOUNT INSTELLINGEN (PASWOORD WIJZIGEN) --- */}
+            {myCard && (
+               <div className="mt-12 bg-zinc-900 border border-zinc-800 p-6 rounded-[2rem] shadow-inner">
+                  <h4 className="text-[10px] font-black uppercase tracking-widest text-zinc-500 mb-4 flex items-center gap-2"><Key size={14}/> Account Instellingen</h4>
+                  <p className="text-xs text-zinc-400 mb-4 italic">Wijzig hier je paswoord. Zorg dat je dit goed onthoudt!</p>
+                  <div className="flex gap-2 max-w-sm">
+                     <input 
+                        type="password" 
+                        placeholder="Nieuw paswoord..." 
+                        className="flex-1 bg-zinc-950 p-3 rounded-xl border border-zinc-800 text-xs outline-none focus:border-orange-500 transition-all" 
+                        value={newPassword} 
+                        onChange={e => setNewPassword(e.target.value)} 
+                     />
+                     <button 
+                        onClick={async () => {
+                           if(!newPassword.trim()) return;
+                           await handleUpdateCard(myCard.id, { secretKey: newPassword.trim() });
+                           setNewPassword('');
+                           showStatus("Paswoord succesvol gewijzigd!");
+                        }} 
+                        className="bg-orange-600 px-6 rounded-xl font-bold text-[10px] uppercase hover:bg-orange-500 transition-all"
+                     >
+                        Wijzig
+                     </button>
+                  </div>
+               </div>
+            )}
           </div>
         )}
 
@@ -897,7 +931,7 @@ export default function App() {
                       </div>
                    </div>
 
-                   {/* NIEUW: Meest Gehate Unit */}
+                   {/* MEEST GEHATE UNITS (Nemesis) */}
                    <div className="bg-zinc-950/50 rounded-3xl p-6 border border-zinc-800 shadow-inner md:col-span-2">
                       <h3 className="text-[10px] font-black uppercase tracking-widest text-zinc-500 mb-4 flex items-center gap-2"><Crosshair size={14}/> Meest Gehate Units (Nemesis Tracker)</h3>
                       <div className="grid grid-cols-1 md:grid-cols-2 gap-4">
@@ -989,10 +1023,22 @@ export default function App() {
                            <div key={c.id} className="bg-zinc-950 p-4 rounded-2xl flex justify-between items-center border border-zinc-800 hover:border-red-900/50 transition-colors">
                               <div>
                                  <p className="font-black text-xs uppercase">{String(c.forceName)}</p>
-                                 <p className="text-[8px] text-zinc-600">{String(c.playerName)}</p>
+                                 <p className="text-[8px] text-zinc-600">Speler: {String(c.playerName)}</p>
                                  {c.timestamp && <p className="text-[8px] text-zinc-500 italic mt-1">Toegevoegd: {new Date(c.timestamp).toLocaleString()}</p>}
                               </div>
-                              <button onClick={() => deleteDocument('cards', c.id)} className="p-2 bg-red-900/10 text-red-600 rounded-lg hover:bg-red-600 hover:text-white transition-all"><Trash2 size={14}/></button>
+                              <div className="flex gap-2">
+                                 <button onClick={async () => {
+                                    if(window.confirm(`Paswoord van ${c.playerName} resetten naar '1234'?`)) {
+                                       await updateDoc(doc(db, 'artifacts', appId, 'public', 'data', 'cards', c.id), { secretKey: '1234' });
+                                       showStatus(`Paswoord van ${c.playerName} is gereset.`);
+                                    }
+                                 }} className="p-2 bg-orange-900/10 text-orange-500 rounded-lg hover:bg-orange-600 hover:text-white transition-all" title="Reset Paswoord naar 1234">
+                                    <Key size={14}/>
+                                 </button>
+                                 <button onClick={() => deleteDocument('cards', c.id)} className="p-2 bg-red-900/10 text-red-600 rounded-lg hover:bg-red-600 hover:text-white transition-all" title="Verwijder Leger">
+                                    <Trash2 size={14}/>
+                                 </button>
+                              </div>
                            </div>
                         ))}
                       </div>
