@@ -60,8 +60,7 @@ import {
 } from 'lucide-react';
 
 // --- CONFIGURATIE ---
-// VERVANG DIT BLOK MET JOUW EIGEN FIREBASE CONFIG!
-const firebaseConfig = {
+const firebaseConfig = typeof __firebase_config !== 'undefined' && __firebase_config ? JSON.parse(__firebase_config) : {
   apiKey: "AIzaSyDPElu2Z_ktdfHCrmvONBcG2fDjH7aiAlM",
   authDomain: "crusade-armageddon.firebaseapp.com",
   projectId: "crusade-armageddon",
@@ -69,7 +68,6 @@ const firebaseConfig = {
   messagingSenderId: "726265348764",
   appId: "1:726265348764:web:f81af74ec1238cdf6ea359",
   measurementId: "G-M2520W5RH8"
-  /* PLAK HIER JOUW EIGEN FIREBASE CONFIG */
 };
 
 const app = initializeApp(firebaseConfig);
