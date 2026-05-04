@@ -127,7 +127,7 @@ export default function App() {
   const [isAdminAuthenticated, setIsAdminAuthenticated] = useState(false);
   const [adminInput, setAdminInput] = useState("");
   const [adminChronicleText, setAdminChronicleText] = useState("");
-  const [isClaiming, setIsClaiming] = useState(false); // Let op: false betekent we tonen 'Inloggen' eerst
+  const [isClaiming, setIsClaiming] = useState(false); // false betekent Inloggen eerst
 
   // Form States
   const [newLore, setNewLore] = useState({ title: '', content: '', linkedBattleId: '' });
@@ -137,6 +137,10 @@ export default function App() {
   const [newUnitName, setNewUnitName] = useState('');
   const [newPassword, setNewPassword] = useState('');
   const [editingLore, setEditingLore] = useState(null);
+
+  // States voor bewerken legernaam
+  const [isEditingForceName, setIsEditingForceName] = useState(false);
+  const [editForceNameInput, setEditForceNameInput] = useState('');
 
   // States voor het bekijken van andere legers (Read-only)
   const [expandedOtherCard, setExpandedOtherCard] = useState(null);
@@ -253,6 +257,61 @@ export default function App() {
   const handleUpdateUnit = async (card, unitId, field, value) => {
     const updatedUnits = card.units.map(u => u.id === unitId ? { ...u, [field]: value } : u);
     await updateDoc(doc(db, 'artifacts', appId, 'public', 'data', 'cards', card.id), { units: updatedUnits });
+  };
+
+  // --- NIEUW: Cascade logica voor legernaam ---
+  const handleUpdateForceName = async () => {
+    const oldName = myCard.forceName;
+    const newName = editForceNameInput.trim();
+    if (!newName || oldName === newName) {
+      setIsEditingForceName(false);
+      return;
+    }
+    setIsProcessing(true);
+    showStatus("Legernaam updaten over alle archieven...");
+    try {
+      // 1. Update de Crusade Card
+      await updateDoc(doc(db, 'artifacts', appId, 'public', 'data', 'cards', myCard.id), { forceName: newName });
+      
+      // 2. Update veldslagen
+      for (const b of battleLogs) {
+        let updates = {};
+        if (b.attacker === oldName) updates.attacker = newName;
+        if (b.defender === oldName) updates.defender = newName;
+        if (b.winner === oldName) updates.winner = newName;
+        if (Object.keys(updates).length > 0) {
+          await updateDoc(doc(db, 'artifacts', appId, 'public', 'data', 'battles', b.id), updates);
+        }
+      }
+
+      // 3. Update Lore
+      for (const l of loreEntries) {
+        if (l.forceName === oldName) {
+          await updateDoc(doc(db, 'artifacts', appId, 'public', 'data', 'lore', l.id), { forceName: newName });
+        }
+      }
+
+      // 4. Update Nemesis info bij andere legers
+      for (const c of crusadeCards) {
+        let changed = false;
+        const updatedUnits = (c.units || []).map(u => {
+          if (u.nemesisForce === oldName) {
+            changed = true;
+            return { ...u, nemesisForce: newName };
+          }
+          return u;
+        });
+        if (changed) {
+          await updateDoc(doc(db, 'artifacts', appId, 'public', 'data', 'cards', c.id), { units: updatedUnits });
+        }
+      }
+      showStatus("Legernaam overal succesvol gewijzigd!");
+    } catch (err) {
+      showStatus("Fout bij updaten legernaam.", "error");
+    } finally {
+      setIsEditingForceName(false);
+      setIsProcessing(false);
+    }
   };
 
   const handleUpdateNemesis = async (card, unitId, targetNemesisId) => {
@@ -555,7 +614,25 @@ export default function App() {
               <div className="bg-zinc-900 border-2 border-orange-600 rounded-[2.5rem] overflow-hidden shadow-2xl">
                 <div className="p-8 bg-zinc-950/50 border-b border-zinc-800 flex justify-between items-start flex-wrap gap-4">
                   <div>
-                    <h3 className="text-3xl font-black uppercase italic tracking-tighter flex items-center gap-2">{myCard.forceName} <button onClick={() => window.print()} title="Print Roster" className="text-zinc-600 hover:text-white transition-all"><Printer size={16}/></button></h3>
+                    {isEditingForceName ? (
+                       <div className="flex items-center gap-2 mb-2">
+                          <input 
+                             type="text" 
+                             className="bg-zinc-950 p-2 rounded-lg border border-zinc-800 text-xl font-black uppercase italic text-white outline-none focus:border-orange-500"
+                             value={editForceNameInput}
+                             onChange={e => setEditForceNameInput(e.target.value)}
+                             autoFocus
+                          />
+                          <button onClick={handleUpdateForceName} disabled={isProcessing} className="bg-green-600 p-2 rounded-lg hover:bg-green-500 transition-all"><Check size={16}/></button>
+                          <button onClick={() => setIsEditingForceName(false)} className="bg-zinc-800 p-2 rounded-lg hover:bg-zinc-700 transition-all"><X size={16}/></button>
+                       </div>
+                    ) : (
+                       <h3 className="text-3xl font-black uppercase italic tracking-tighter flex items-center gap-2">
+                          {String(myCard.forceName)} 
+                          <button onClick={() => { setEditForceNameInput(String(myCard.forceName)); setIsEditingForceName(true); }} title="Bewerk Legernaam" className="text-zinc-600 hover:text-orange-500 transition-all ml-2"><Edit3 size={18}/></button>
+                          <button onClick={() => window.print()} title="Print Roster" className="text-zinc-600 hover:text-white transition-all"><Printer size={18}/></button>
+                       </h3>
+                    )}
                     <p className="text-zinc-500 text-xs font-bold uppercase">{myCard.faction} | {myCard.playerName}</p>
                   </div>
                   <div className="flex gap-4">
@@ -637,7 +714,7 @@ export default function App() {
                                <UnitField label="Lore / Campaign Records" area value={unit.customInfo} onChange={v => handleUpdateUnit(myCard, unit.id, 'customInfo', v)} />
                             </div>
 
-                            {/* NIEUW: Nemesis Sectie */}
+                            {/* Nemesis Sectie */}
                             <div className="md:col-span-2 pt-4 border-t border-zinc-800/50 mt-2">
                                <h4 className="text-[10px] font-black uppercase tracking-widest text-zinc-500 mb-4">Rivaliteit & Nemesis</h4>
                                <div className="grid grid-cols-1 md:grid-cols-2 gap-4">
