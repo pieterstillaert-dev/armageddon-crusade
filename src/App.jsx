@@ -127,7 +127,7 @@ export default function App() {
   const [isAdminAuthenticated, setIsAdminAuthenticated] = useState(false);
   const [adminInput, setAdminInput] = useState("");
   const [adminChronicleText, setAdminChronicleText] = useState("");
-  const [isClaiming, setIsClaiming] = useState(false); // false betekent Inloggen eerst
+  const [isClaiming, setIsClaiming] = useState(false); // Let op: false betekent we tonen 'Inloggen' eerst
 
   // Form States
   const [newLore, setNewLore] = useState({ title: '', content: '', linkedBattleId: '' });
@@ -135,6 +135,7 @@ export default function App() {
   const [cardForm, setCardForm] = useState({ forceName: '', faction: '', superFaction: 'Imperium', playerName: '', supply: 500, rp: 0, crusadePoints: 0, secretKey: '' });
   const [claimForm, setClaimForm] = useState({ loginName: '', secretKey: '' });
   const [newUnitName, setNewUnitName] = useState('');
+  const [newUnitOfficialName, setNewUnitOfficialName] = useState('');
   const [newPassword, setNewPassword] = useState('');
   const [editingLore, setEditingLore] = useState(null);
 
@@ -245,12 +246,13 @@ export default function App() {
   const handleCreateUnit = async (card) => {
     if (!newUnitName.trim()) return;
     const newUnit = { 
-      id: Date.now().toString(), name: newUnitName.trim(), xp: 0, modelCount: 1, points: 0, killTally: 0, 
+      id: Date.now().toString(), name: newUnitName.trim(), officialName: newUnitOfficialName.trim(), xp: 0, modelCount: 1, points: 0, killTally: 0, 
       isWarlord: false, unitType: 'Other', traits: '', mods: '', scars: '', relics: '', enhancements: '', customInfo: '',
       nemesisId: '', nemesisName: '', nemesisForce: '', nemesisReason: ''
     };
     await handleUpdateCard(card.id, { units: [...(card.units || []), newUnit] }, `Unit toegevoegd: ${newUnitName}`);
     setNewUnitName('');
+    setNewUnitOfficialName('');
     setIsAddingUnit(false);
   };
 
@@ -259,7 +261,7 @@ export default function App() {
     await updateDoc(doc(db, 'artifacts', appId, 'public', 'data', 'cards', card.id), { units: updatedUnits });
   };
 
-  // --- NIEUW: Cascade logica voor legernaam ---
+  // --- Cascade logica voor legernaam ---
   const handleUpdateForceName = async () => {
     const oldName = myCard.forceName;
     const newName = editForceNameInput.trim();
@@ -420,7 +422,7 @@ export default function App() {
   ];
 
   // --- Nemesis Helper & Leaderboard Variabelen ---
-  const otherForcesUnits = myCard ? crusadeCards.filter(c => c.id !== myCard.id).flatMap(c => (c.units || []).map(u => ({ id: u.id, name: u.name, force: c.forceName }))) : [];
+  const otherForcesUnits = myCard ? crusadeCards.filter(c => c.id !== myCard.id).flatMap(c => (c.units || []).map(u => ({ id: u.id, name: u.name, officialName: u.officialName, force: c.forceName }))) : [];
 
   const nemesisCounts = {};
   crusadeCards.forEach(c => {
@@ -665,10 +667,13 @@ export default function App() {
                     <button onClick={() => setIsAddingUnit(true)} className="bg-orange-600 px-4 py-2 rounded-full text-[10px] font-black uppercase transition-all hover:scale-105">+ Unit</button>
                   </div>
                   {isAddingUnit && (
-                    <div className="flex gap-2 animate-in slide-in-from-right-2">
-                      <input type="text" placeholder="Unit Naam..." className="flex-1 bg-zinc-950 border border-zinc-800 p-2 rounded-lg text-xs outline-none focus:border-orange-500" value={newUnitName} onChange={e => setNewUnitName(e.target.value)} autoFocus />
-                      <button onClick={() => handleCreateUnit(myCard)} className="bg-green-600 p-2 rounded-lg transition-all hover:bg-green-500"><Check size={14}/></button>
-                      <button onClick={() => setIsAddingUnit(false)} className="bg-zinc-800 p-2 rounded-lg transition-all hover:bg-zinc-700"><X size={14}/></button>
+                    <div className="flex gap-2 animate-in slide-in-from-right-2 flex-col md:flex-row">
+                      <input type="text" placeholder="Crusade Naam (Bv. Lion's Guard)..." className="flex-1 bg-zinc-950 border border-zinc-800 p-2 rounded-lg text-xs outline-none focus:border-orange-500" value={newUnitName} onChange={e => setNewUnitName(e.target.value)} autoFocus />
+                      <input type="text" placeholder="Officiële Unit (Bv. Intercessor Squad)..." className="flex-1 bg-zinc-950 border border-zinc-800 p-2 rounded-lg text-xs outline-none focus:border-orange-500" value={newUnitOfficialName} onChange={e => setNewUnitOfficialName(e.target.value)} />
+                      <div className="flex gap-2">
+                         <button onClick={() => handleCreateUnit(myCard)} className="bg-green-600 p-2 rounded-lg transition-all hover:bg-green-500 w-full md:w-auto flex justify-center"><Check size={14}/></button>
+                         <button onClick={() => setIsAddingUnit(false)} className="bg-zinc-800 p-2 rounded-lg transition-all hover:bg-zinc-700 w-full md:w-auto flex justify-center"><X size={14}/></button>
+                      </div>
                     </div>
                   )}
                   <div className="space-y-4">
@@ -677,7 +682,10 @@ export default function App() {
                         <div className="p-4 flex justify-between items-center bg-zinc-900/10">
                           <div className="flex items-center gap-4 flex-wrap">
                             <span className="text-orange-500 font-black text-xs px-2 py-1 bg-orange-500/5 rounded border border-orange-500/20">{unit.xp} XP</span>
-                            <h5 className="font-black uppercase flex items-center gap-2">{String(unit.name)} {unit.isWarlord && <Crown size={14} className="text-yellow-500"/>}</h5>
+                            <div className="flex flex-col">
+                               <h5 className="font-black uppercase flex items-center gap-2">{String(unit.name)} {unit.isWarlord && <Crown size={14} className="text-yellow-500"/>}</h5>
+                               {unit.officialName && <span className="text-[9px] text-zinc-500 uppercase tracking-widest">{String(unit.officialName)}</span>}
+                            </div>
                             <div className="flex gap-4 text-[9px] text-zinc-600 font-bold uppercase">
                                <span><Skull size={10} className="inline mr-1"/> {unit.killTally || 0} Kills</span>
                                <span><Coins size={10} className="inline mr-1"/> {unit.points || 0} pts</span>
@@ -696,26 +704,30 @@ export default function App() {
                           </div>
                         </div>
                         {expandedUnit === unit.id && (
-                          <div className="p-6 grid grid-cols-1 md:grid-cols-2 gap-6 border-t border-zinc-800 bg-zinc-900/10 animate-in slide-in-from-top-2">
+                          <div className="p-6 border-t border-zinc-800 bg-zinc-900/10 animate-in slide-in-from-top-2">
                             <div className="space-y-4">
+                               <div className="grid grid-cols-1 md:grid-cols-2 gap-4">
+                                  <UnitField label="Crusade Naam" value={unit.name} onChange={v => handleUpdateUnit(myCard, unit.id, 'name', v)} />
+                                  <UnitField label="Officiële Unit" value={unit.officialName} onChange={v => handleUpdateUnit(myCard, unit.id, 'officialName', v)} />
+                               </div>
                                <div className="grid grid-cols-2 gap-4">
                                   <UnitField label="XP Points" type="number" value={unit.xp} onChange={v => handleUpdateUnit(myCard, unit.id, 'xp', parseInt(v) || 0)} />
                                   <UnitField label="Kill Tally" type="number" value={unit.killTally} onChange={v => handleUpdateUnit(myCard, unit.id, 'killTally', parseInt(v) || 0)} />
                                   <UnitField label="Points (pts)" type="number" value={unit.points} onChange={v => handleUpdateUnit(myCard, unit.id, 'points', parseInt(v) || 0)} />
                                   <UnitField label="Models" type="number" value={unit.modelCount} onChange={v => handleUpdateUnit(myCard, unit.id, 'modelCount', parseInt(v) || 1)} />
                                </div>
-                               <UnitField label="Battle Traits" value={unit.traits} onChange={v => handleUpdateUnit(myCard, unit.id, 'traits', v)} />
-                               <UnitField label="Weapon Mods" value={unit.mods} onChange={v => handleUpdateUnit(myCard, unit.id, 'mods', v)} />
-                            </div>
-                            <div className="space-y-4">
-                               <UnitField label="Battle Scars" value={unit.scars} onChange={v => handleUpdateUnit(myCard, unit.id, 'scars', v)} />
-                               <UnitField label="Relics" value={unit.relics} onChange={v => handleUpdateUnit(myCard, unit.id, 'relics', v)} />
-                               <UnitField label="Enhancements" value={unit.enhancements} onChange={v => handleUpdateUnit(myCard, unit.id, 'enhancements', v)} />
-                               <UnitField label="Lore / Campaign Records" area value={unit.customInfo} onChange={v => handleUpdateUnit(myCard, unit.id, 'customInfo', v)} />
+                               <div className="grid grid-cols-1 md:grid-cols-2 gap-4">
+                                  <UnitField label="Battle Traits" value={unit.traits} onChange={v => handleUpdateUnit(myCard, unit.id, 'traits', v)} />
+                                  <UnitField label="Weapon Mods" value={unit.mods} onChange={v => handleUpdateUnit(myCard, unit.id, 'mods', v)} />
+                                  <UnitField label="Battle Scars" value={unit.scars} onChange={v => handleUpdateUnit(myCard, unit.id, 'scars', v)} />
+                                  <UnitField label="Relics" value={unit.relics} onChange={v => handleUpdateUnit(myCard, unit.id, 'relics', v)} />
+                                  <UnitField label="Enhancements" value={unit.enhancements} onChange={v => handleUpdateUnit(myCard, unit.id, 'enhancements', v)} />
+                                  <UnitField label="Lore / Campaign Records" area value={unit.customInfo} onChange={v => handleUpdateUnit(myCard, unit.id, 'customInfo', v)} />
+                               </div>
                             </div>
 
-                            {/* Nemesis Sectie */}
-                            <div className="md:col-span-2 pt-4 border-t border-zinc-800/50 mt-2">
+                            {/* NIEUW: Nemesis Sectie */}
+                            <div className="md:col-span-2 pt-4 border-t border-zinc-800/50 mt-4">
                                <h4 className="text-[10px] font-black uppercase tracking-widest text-zinc-500 mb-4">Rivaliteit & Nemesis</h4>
                                <div className="grid grid-cols-1 md:grid-cols-2 gap-4">
                                   <div className="space-y-1">
@@ -726,7 +738,7 @@ export default function App() {
                                         onChange={e => handleUpdateNemesis(myCard, unit.id, e.target.value)}
                                      >
                                         <option value="">-- Geen Nemesis --</option>
-                                        {otherForcesUnits.map(ou => <option key={ou.id} value={ou.id}>{String(ou.force)} - {String(ou.name)}</option>)}
+                                        {otherForcesUnits.map(ou => <option key={ou.id} value={ou.id}>{String(ou.force)} - {String(ou.name)} {ou.officialName ? `(${String(ou.officialName)})` : ''}</option>)}
                                         {unit.nemesisId && !otherForcesUnits.find(ou => ou.id === unit.nemesisId) && (
                                            <option value={unit.nemesisId}>{String(unit.nemesisForce)} - {String(unit.nemesisName)} (Legacy)</option>
                                         )}
@@ -778,7 +790,10 @@ export default function App() {
                                       <div className="p-4 flex justify-between items-center bg-zinc-900/10 cursor-pointer hover:bg-zinc-900/40" onClick={() => setExpandedOtherUnit(expandedOtherUnit === unit.id ? null : unit.id)}>
                                          <div className="flex items-center gap-3">
                                             <span className="text-zinc-500 font-black text-xs px-2 py-1 bg-zinc-900 rounded border border-zinc-800/50">{unit.xp} XP</span>
-                                            <span className="font-black uppercase text-sm text-zinc-300 flex items-center gap-2">{String(unit.name)} {unit.isWarlord && <Crown size={12} className="text-yellow-600/50"/>}</span>
+                                            <div className="flex flex-col">
+                                               <span className="font-black uppercase text-sm text-zinc-300 flex items-center gap-2">{String(unit.name)} {unit.isWarlord && <Crown size={12} className="text-yellow-600/50"/>}</span>
+                                               {unit.officialName && <span className="text-[9px] text-zinc-500 uppercase tracking-widest">{String(unit.officialName)}</span>}
+                                            </div>
                                          </div>
                                          <div className="flex items-center gap-3">
                                             <div className="flex gap-3 text-[9px] text-zinc-600 font-bold uppercase">
@@ -793,6 +808,8 @@ export default function App() {
                                          <div className="p-5 grid grid-cols-1 md:grid-cols-2 gap-6 border-t border-zinc-800/50 bg-zinc-900/5">
                                             <div className="space-y-4">
                                                <div className="grid grid-cols-2 gap-4">
+                                                  <ReadOnlyField label="Crusade Naam" value={unit.name} />
+                                                  <ReadOnlyField label="Officiële Unit" value={unit.officialName} />
                                                   <ReadOnlyField label="XP Points" value={unit.xp} />
                                                   <ReadOnlyField label="Kill Tally" value={unit.killTally} />
                                                   <ReadOnlyField label="Points (pts)" value={unit.points} />
